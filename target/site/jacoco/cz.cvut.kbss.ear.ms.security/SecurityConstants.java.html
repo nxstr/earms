@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.security</a> &gt; <span class="el_source">SecurityConstants.java</span></div><h1>SecurityConstants.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.security;
+
+public class SecurityConstants {
+<span class="nc" id="L4">    private SecurityConstants() {</span>
+<span class="nc" id="L5">        throw new AssertionError();</span>
+    }
+
+    public static final String SESSION_COOKIE_NAME = &quot;JSESSIONID&quot;;
+
+    public static final String REMEMBER_ME_COOKIE_NAME = &quot;remember_me&quot;;
+
+    public static final String USERNAME_PARAM = &quot;username&quot;;
+
+    public static final String PASSWORD_PARAM = &quot;password&quot;;
+
+    public static final String SECURITY_CHECK_URI = &quot;/security_check&quot;;
+
+    public static final String LOGOUT_URI = &quot;/logout&quot;;
+
+    public static final String COOKIE_URI = &quot;/&quot;;
+
+    public static final int SESSION_TIMEOUT = 60 * 60;
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.service</a> &gt; <span class="el_source">LoginService.java</span></div><h1>LoginService.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.service;
+
+import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
+import cz.cvut.kbss.ear.ms.security.DefaultAuthenticationProvider;
+import cz.cvut.kbss.ear.ms.security.SecurityUtils;
+import cz.cvut.kbss.ear.ms.security.model.AccountDetails;
+import cz.cvut.kbss.ear.ms.security.service.AccountDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Service
+public class LoginService {
+
+    private final DefaultAuthenticationProvider provider;
+    private final AccountDetailsService userDetailsService;
+
+    @Autowired
+<span class="fc" id="L22">    public LoginService(DefaultAuthenticationProvider provider, AccountDetailsService userDetailsService) {</span>
+<span class="fc" id="L23">        this.provider = provider;</span>
+<span class="fc" id="L24">        this.userDetailsService = userDetailsService;</span>
+<span class="fc" id="L25">    }</span>
+
+    @Transactional
+    public void loginUser (String username, String password) throws ExistsException {
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (SecurityUtils.getCurrentUserDetails() != null) {</span>
+<span class="nc" id="L30">            throw new ExistsException(&quot;You are already login.&quot; + SecurityUtils.getCurrentUserDetails().getUsername());</span>
+        }
+<span class="nc" id="L32">        Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);</span>
+<span class="nc" id="L33">        provider.authenticate(authentication);</span>
+
+<span class="nc" id="L35">        final AccountDetails userDetails = (AccountDetails) userDetailsService.loadUserByUsername(username);</span>
+<span class="nc" id="L36">        SecurityUtils.setCurrentUser(userDetails);</span>
+<span class="nc" id="L37">        System.out.println(SecurityUtils.getCurrentUser().getRole());</span>
+<span class="nc" id="L38">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

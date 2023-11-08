@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EventService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.service</a> &gt; <span class="el_source">EventService.java</span></div><h1>EventService.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.service;
+
+import cz.cvut.kbss.ear.ms.dao.EventDao;
+import cz.cvut.kbss.ear.ms.dao.UserDao;
+import cz.cvut.kbss.ear.ms.exceptions.DateValidationException;
+import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
+import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
+import cz.cvut.kbss.ear.ms.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.*;
+
+@Service
+public class EventService {
+    private final EventDao dao;
+    private final UserDao userDao;
+    private final PollOptionService pollOptionService;
+    private final DefaultEmailService emailService;
+    @Autowired
+<span class="fc" id="L23">    public EventService(EventDao dao, UserDao userDao, PollOptionService pollOptionService, DefaultEmailService emailService) {</span>
+<span class="fc" id="L24">        this.dao = dao;</span>
+<span class="fc" id="L25">        this.userDao = userDao;</span>
+<span class="fc" id="L26">        this.pollOptionService = pollOptionService;</span>
+<span class="fc" id="L27">        this.emailService = emailService;</span>
+<span class="fc" id="L28">    }</span>
+    @Transactional
+    public Event create(String name, String detail, String location, LocalDate openDueTo, User owner){
+<span class="nc" id="L31">        Event event = new Event();</span>
+<span class="nc" id="L32">        Objects.requireNonNull(name);</span>
+<span class="nc" id="L33">        event.setName(name);</span>
+<span class="nc" id="L34">        event.setDetail(detail);</span>
+<span class="nc" id="L35">        event.setLocation(location);</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">        if(openDueTo.isBefore(LocalDate.now())){</span>
+<span class="nc" id="L37">            throw new DateValidationException(&quot;Date is no longer valid&quot;);</span>
+        }
+<span class="nc" id="L39">        event.setOpenDueTo(openDueTo);</span>
+<span class="nc" id="L40">        event.setOptions(new ArrayList&lt;&gt;());</span>
+
+<span class="nc" id="L42">        Objects.requireNonNull(owner);</span>
+<span class="nc" id="L43">        event.setOwner(owner);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if(owner.getOwnedEvents().isEmpty()){</span>
+<span class="nc" id="L45">            owner.setOwnedEvents(new HashSet&lt;&gt;());</span>
+        }
+<span class="nc" id="L47">        owner.getOwnedEvents().add(event);</span>
+<span class="nc" id="L48">        dao.persist(event);</span>
+<span class="nc" id="L49">        return event;</span>
+    }
+
+
+
+    @Transactional
+    public void addRegisteredUserAsAGuestByUsername(String username, Event event){
+<span class="fc" id="L56">        Objects.requireNonNull(event);</span>
+<span class="fc" id="L57">        Objects.requireNonNull(username);</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if(event.getGuests() == null){</span>
+<span class="fc" id="L59">            event.setGuests(new HashSet&lt;&gt;());</span>
+        }
+<span class="nc" id="L61">        User user = userDao.findByUsername(username);</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        if(user==null){</span>
+<span class="nc" id="L64">            throw new NotFoundException(&quot;User with this username does not exist&quot;);</span>
+        }
+<span class="nc" id="L66">        addGuest(event, user);</span>
+<span class="nc" id="L67">    }</span>
+    @Transactional
+    public void addUserAsAGuestByEmail(String email, Event event){
+<span class="nc" id="L70">        Objects.requireNonNull(event);</span>
+<span class="nc" id="L71">        Objects.requireNonNull(email);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if(event.getGuests() == null){</span>
+<span class="nc" id="L73">            event.setGuests(new HashSet&lt;&gt;());</span>
+        }
+<span class="nc" id="L75">        User user = userDao.findByEmail(email);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if(user==null){</span>
+<span class="nc" id="L77">            emailService.sendSimpleEmail(email, &quot;Registration&quot;, &quot;You have been invited to register on Meeting Scheduler\nhttp://localhost:8080/ms/rest/users/register&quot;);</span>
+<span class="nc" id="L78">            return;</span>
+        }
+<span class="nc" id="L80">        addGuest(event, user);</span>
+<span class="nc" id="L81">    }</span>
+    @Transactional
+    public void addGuest(Event event, User user) {
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if(event.getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="fc" id="L85">            throw new DateValidationException(&quot;Event is already closed&quot;);</span>
+        }
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if(Objects.equals(user.getId(), event.getOwner().getId())){</span>
+<span class="nc" id="L88">            throw new ExistsException(&quot;Owner of event can not be added as a guest&quot;);</span>
+        }
+<span class="pc bpc" id="L90" title="1 of 2 branches missed.">        if(event.getGuests()==null){</span>
+<span class="fc" id="L91">            event.setGuests(new HashSet&lt;&gt;());</span>
+        }
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        for(User u: event.getGuests()){</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if(Objects.equals(user.getUsername(), u.getUsername())){</span>
+<span class="nc" id="L95">                throw new ExistsException(&quot;Same user is already added to this event&quot;);</span>
+            }
+<span class="nc" id="L97">        }</span>
+<span class="fc" id="L98">        event.getGuests().add(user);</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if(user.getGuestEvents()==null){</span>
+<span class="fc" id="L100">            user.setGuestEvents(new HashSet&lt;&gt;());</span>
+        }
+<span class="fc" id="L102">        user.getGuestEvents().add(event);</span>
+
+<span class="fc" id="L104">        dao.update(event);</span>
+<span class="fc" id="L105">    }</span>
+
+    @Transactional
+    public void removeGuest(Event event, User user){
+<span class="nc" id="L109">        Objects.requireNonNull(event);</span>
+<span class="nc" id="L110">        Objects.requireNonNull(user);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if(event.getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L112">            throw new DateValidationException(&quot;Event is already closed&quot;);</span>
+        }
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if(Objects.equals(user.getId(), event.getOwner().getId())){</span>
+<span class="nc" id="L115">            throw new ExistsException(&quot;Owner of event can not be removed from event&quot;);</span>
+        }
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        for(User u:event.getGuests()){</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if(Objects.equals(u.getId(), user.getId())){</span>
+<span class="nc" id="L119">                user.getGuestEvents().remove(event);</span>
+<span class="nc" id="L120">                userDao.update(user);</span>
+<span class="nc" id="L121">                event.getGuests().remove(user);</span>
+<span class="nc" id="L122">                dao.update(event);</span>
+<span class="nc" id="L123">                return;</span>
+            }
+<span class="nc" id="L125">        }</span>
+<span class="nc" id="L126">        throw new NotFoundException(&quot;User with this id is not belong to this event&quot;);</span>
+    }
+
+
+    @Transactional
+    public void addPollOption(Event event, PollOption pollOption){
+<span class="nc" id="L132">        Objects.requireNonNull(event);</span>
+<span class="nc" id="L133">        Objects.requireNonNull(pollOption);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if(event.getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L135">            throw new DateValidationException(&quot;Event is already closed&quot;);</span>
+        }
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if(pollOption.getDateSlot().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L138">            throw new DateValidationException(&quot;Dateoption is not valid&quot;);</span>
+        }
+<span class="nc" id="L140">        pollOption.setIsFinal(false);</span>
+<span class="nc" id="L141">        pollOptionService.persist(pollOption, event);</span>
+<span class="nc" id="L142">        event.getOptions().add(pollOption);</span>
+<span class="nc" id="L143">        dao.update(event);</span>
+<span class="nc" id="L144">    }</span>
+
+    @Transactional
+    public void removePollOption(Event event, PollOption pollOption){
+<span class="nc" id="L148">        Objects.requireNonNull(event);</span>
+<span class="nc" id="L149">        Objects.requireNonNull(pollOption);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        if(event.getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L151">            throw new DateValidationException(&quot;Event is already closed&quot;);</span>
+        }
+<span class="nc" id="L153">        boolean exist = false;</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        for(PollOption p: event.getOptions()){</span>
+<span class="nc bnc" id="L155" title="All 4 branches missed.">            if(p.getDateSlot()==pollOption.getDateSlot() &amp;&amp; p.getTimeSlot()==p.getTimeSlot()){</span>
+<span class="nc" id="L156">                event.getOptions().remove(p);</span>
+<span class="nc" id="L157">                exist = true;</span>
+<span class="nc" id="L158">                break;</span>
+            }
+<span class="nc" id="L160">        }</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if(!exist){</span>
+<span class="nc" id="L162">            throw new NotFoundException(&quot;PollOption is not exist in this event!&quot;);</span>
+        }
+<span class="nc" id="L164">        pollOptionService.delete(pollOption);</span>
+<span class="nc" id="L165">        dao.update(event);</span>
+<span class="nc" id="L166">    }</span>
+
+
+    @Transactional
+    public void closeEvent(Event event){
+<span class="pc bpc" id="L171" title="3 of 4 branches missed.">        if(event.getOpenDueTo().isAfter(LocalDate.now()) || event.getOpenDueTo().isEqual(LocalDate.now())){</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">            if(pollOptionService.findFinalForEvent(event)==null) {</span>
+<span class="nc" id="L173">                makeAutoFinalPollOption(event);</span>
+            }
+<span class="fc" id="L175">            event.setOpenDueTo(LocalDate.now().minusDays(1));</span>
+        }
+<span class="fc" id="L177">        dao.update(event);</span>
+<span class="fc" id="L178">    }</span>
+
+    @Transactional
+    public void closeAll(User user){
+<span class="fc" id="L182">        Set&lt;Event&gt; events = findAllActiveForOwner(user);</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        for (Event e : events) {</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            if (pollOptionService.findFinalForEvent(e) == null) {</span>
+<span class="fc" id="L185">                makeAutoFinalPollOption(e);</span>
+            }
+<span class="fc" id="L187">            closeEvent(e);</span>
+<span class="fc" id="L188">        }</span>
+<span class="fc" id="L189">    }</span>
+
+    @Transactional
+    public boolean isClosed(Event event){
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        return !event.getOpenDueTo().isAfter(LocalDate.now());</span>
+    }
+
+
+    @Transactional
+    public void makeAutoFinalPollOption(Event event){
+<span class="fc" id="L199">        PollOption pollOption = pollOptionService.findFinalForEvent(event);</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        if(pollOption==null){</span>
+<span class="fc" id="L201">            int max = 0;</span>
+<span class="fc" id="L202">            PollOption opt = null;</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">            for(PollOption p : event.getOptions()){</span>
+<span class="fc" id="L204">                opt = p;</span>
+<span class="fc" id="L205">                break;</span>
+            }
+<span class="pc bpc" id="L207" title="3 of 4 branches missed.">            if (event.getOpenDueTo().isAfter(LocalDate.now()) || event.getOpenDueTo().isEqual(LocalDate.now())) {</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">                for (PollOption p : event.getOptions()) {</span>
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">                    if (pollOptionService.countPositiveVotes(p) &gt; max) {</span>
+<span class="nc" id="L210">                        max = pollOptionService.countPositiveVotes(p);</span>
+<span class="nc" id="L211">                        opt = p;</span>
+                    }
+<span class="fc" id="L213">                }</span>
+            }
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">            if (opt != null) {</span>
+<span class="fc" id="L216">                opt.setIsFinal(true);</span>
+<span class="fc" id="L217">                pollOptionService.setFinal(opt);</span>
+            }
+        }
+<span class="fc" id="L220">    }</span>
+
+    @Transactional(readOnly = true)
+    public Set&lt;Event&gt; findAllActiveForOwner(User owner){
+<span class="fc" id="L224">        return new HashSet&lt;&gt;(dao.findAllOpenedForOneOwner(owner));</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Event find(Integer id){
+<span class="nc" id="L229">        Event event = dao.find(id);</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        if(event==null) {</span>
+<span class="nc" id="L231">            throw new NotFoundException(&quot;Event with this id s not found&quot;);</span>
+        }
+<span class="nc" id="L233">        return event;</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Set&lt;Event&gt; findAllActiveGuestEvents(User guest){
+<span class="nc" id="L238">        Objects.requireNonNull(guest.getGuestEvents());</span>
+<span class="nc" id="L239">        Set&lt;Event&gt; events = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        for(Event e: guest.getGuestEvents()){</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">            if(e.getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L242">                continue;</span>
+            }
+<span class="nc" id="L244">            events.add(e);</span>
+<span class="nc" id="L245">        }</span>
+<span class="nc" id="L246">        return events;</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Set&lt;Event&gt; findAllNotVotedEvents(User guest){
+<span class="nc" id="L251">        Objects.requireNonNull(guest.getGuestEvents());</span>
+<span class="nc" id="L252">        Set&lt;Event&gt; events = findAllActiveGuestEvents(guest);</span>
+<span class="nc" id="L253">        List&lt;Vote&gt; votes = guest.getVotes();</span>
+<span class="nc" id="L254">        Set&lt;Event&gt; notVoted = new HashSet&lt;&gt;();</span>
+        boolean isVoted;
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        for(Event e:events){</span>
+<span class="nc" id="L257">            isVoted = false;</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            for(Vote v:votes){</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                if(v.getPollOption().getEvent()==e){</span>
+<span class="nc" id="L260">                    isVoted = true;</span>
+<span class="nc" id="L261">                    break;</span>
+                }
+<span class="nc" id="L263">            }</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">            if(!isVoted){</span>
+<span class="nc" id="L265">                notVoted.add(e);</span>
+            }
+<span class="nc" id="L267">        }</span>
+<span class="nc" id="L268">        return notVoted;</span>
+    }
+
+    @Transactional
+    public Event update(Event event, Integer id){
+<span class="nc" id="L273">        Objects.requireNonNull(event);</span>
+<span class="nc" id="L274">        Event event1 = dao.find(id);</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if(event1==null){</span>
+<span class="nc" id="L276">            throw new NotFoundException(&quot;Event with id &quot; + id + &quot; is not found&quot;);</span>
+        }
+<span class="nc" id="L278">        event1.setName(event.getName());</span>
+<span class="nc" id="L279">        event1.setLocation(event.getLocation());</span>
+<span class="nc" id="L280">        event1.setOpenDueTo(event.getOpenDueTo());</span>
+<span class="nc" id="L281">        event1.setDetail(event.getDetail());</span>
+<span class="nc" id="L282">        dao.update(event1);</span>
+<span class="nc" id="L283">        return event1;</span>
+    }
+
+    @Transactional
+    public void delete(Event event){
+<span class="nc" id="L288">        Objects.requireNonNull(event);</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">            for(User u: event.getGuests()){</span>
+<span class="nc" id="L290">                u.getGuestEvents().remove(event);</span>
+<span class="nc" id="L291">                userDao.update(u);</span>
+<span class="nc" id="L292">            }</span>
+<span class="nc" id="L293">            event.setGuests(new HashSet&lt;&gt;());</span>
+<span class="nc" id="L294">        User owner = event.getOwner();</span>
+<span class="nc" id="L295">        owner.getOwnedEvents().remove(event);</span>
+<span class="nc" id="L296">        userDao.update(owner);</span>
+<span class="nc" id="L297">        dao.remove(event);</span>
+<span class="nc" id="L298">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

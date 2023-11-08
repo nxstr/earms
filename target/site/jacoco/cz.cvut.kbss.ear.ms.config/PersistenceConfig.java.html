@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PersistenceConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.config</a> &gt; <span class="el_source">PersistenceConfig.java</span></div><h1>PersistenceConfig.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.config;
+
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
+import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
+import org.springframework.transaction.jta.JtaTransactionManager;
+
+import javax.sql.DataSource;
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+@PropertySource(&quot;classpath:eclipselink.properties&quot;)     // Contains additional, Eclipselink-specific configuration
+public class PersistenceConfig extends JpaBaseConfiguration {
+
+    private final Environment environment;
+
+    protected PersistenceConfig(DataSource dataSource,
+                                JpaProperties properties,
+                                ObjectProvider&lt;JtaTransactionManager&gt; jtaTransactionManager,
+                                Environment environment) {
+<span class="fc" id="L27">        super(dataSource, properties, jtaTransactionManager);</span>
+<span class="fc" id="L28">        this.environment = environment;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
+<span class="fc" id="L33">        return new EclipseLinkJpaVendorAdapter();</span>
+    }
+
+    @Override
+    protected Map&lt;String, Object&gt; getVendorProperties() {
+<span class="fc" id="L38">        final Map&lt;String, Object&gt; props = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L39">        props.put(&quot;eclipselink.weaving&quot;, &quot;static&quot;);</span>
+<span class="fc" id="L40">        props.put(&quot;eclipselink.ddl-generation&quot;, environment.getRequiredProperty(&quot;eclipselink.ddl-generation&quot;));</span>
+<span class="fc" id="L41">        return props;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

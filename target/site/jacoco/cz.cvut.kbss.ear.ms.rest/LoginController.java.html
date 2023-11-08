@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoginController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.rest</a> &gt; <span class="el_source">LoginController.java</span></div><h1>LoginController.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.rest;
+
+import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
+import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
+import cz.cvut.kbss.ear.ms.service.LoginService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+
+@RestController
+@RequestMapping(&quot;/auth&quot;)
+public class LoginController {
+<span class="fc" id="L23">    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);</span>
+
+    private final LoginService loginService;
+
+    @Autowired
+<span class="fc" id="L28">    public LoginController(LoginService loginService) {</span>
+<span class="fc" id="L29">        this.loginService = loginService;</span>
+<span class="fc" id="L30">    }</span>
+
+    @PostMapping(value = &quot;/login&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity&lt;String&gt; loginUser(@RequestBody HashMap&lt;String, String&gt; request){
+        try {
+<span class="nc" id="L35">            loginService.loginUser(request.get(&quot;username&quot;), request.get(&quot;password&quot;));</span>
+<span class="nc" id="L36">            LOG.trace(&quot;User {} successfully logged in&quot;, request.get(&quot;username&quot;));</span>
+<span class="nc" id="L37">            return new ResponseEntity&lt;&gt;(&quot;Welcome to MS, &quot; + request.get(&quot;username&quot;), HttpStatus.OK);</span>
+<span class="nc" id="L38">        }catch (ExistsException e){</span>
+<span class="nc" id="L39">            LOG.trace(&quot;User {} is already logged in&quot;, request.get(&quot;username&quot;));</span>
+<span class="nc" id="L40">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L41">        }catch (NotFoundException e){</span>
+<span class="nc" id="L42">            LOG.trace(&quot;User {} is not exist&quot;, request.get(&quot;username&quot;));</span>
+<span class="nc" id="L43">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.UNAUTHORIZED);</span>
+<span class="nc" id="L44">        }catch (BadCredentialsException e){</span>
+<span class="nc" id="L45">            LOG.trace(&quot; Wrong password for username {} is not exist&quot;, request.get(&quot;username&quot;));</span>
+<span class="nc" id="L46">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.UNAUTHORIZED);</span>
+        }
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

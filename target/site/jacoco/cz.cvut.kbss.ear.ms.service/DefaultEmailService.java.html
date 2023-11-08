@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultEmailService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.service</a> &gt; <span class="el_source">DefaultEmailService.java</span></div><h1>DefaultEmailService.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.javamail.MimeMessagePreparator;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.mail.internet.InternetAddress;
+
+@Service
+<span class="fc" id="L14">public class DefaultEmailService{</span>
+
+    @Autowired
+    public JavaMailSender emailSender;
+
+    @Transactional
+    public void sendSimpleEmail(String toAddress, String subject, String message) {
+
+        try {
+<span class="nc" id="L23">            MimeMessagePreparator preparator = (mimeMessage) -&gt; {</span>
+<span class="nc" id="L24">                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);</span>
+<span class="nc" id="L25">                helper.setFrom(new InternetAddress(&quot;test.meeting.scheduler@gmail.com&quot;, &quot;Meeting Scheduler Test&quot;));</span>
+<span class="nc" id="L26">                helper.setTo(toAddress);</span>
+<span class="nc" id="L27">                helper.setSubject(subject);</span>
+<span class="nc" id="L28">                helper.setText(message, true);</span>
+<span class="nc" id="L29">            };</span>
+<span class="nc" id="L30">            emailSender.send(preparator);</span>
+<span class="nc" id="L31">        } catch (MailException exception) {</span>
+<span class="nc" id="L32">            throw exception;</span>
+<span class="nc" id="L33">        }</span>
+<span class="nc" id="L34">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

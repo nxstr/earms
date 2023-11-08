@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthenticationSuccess.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.security</a> &gt; <span class="el_source">AuthenticationSuccess.java</span></div><h1>AuthenticationSuccess.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.security;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.cvut.kbss.ear.ms.security.model.AccountDetails;
+import cz.cvut.kbss.ear.ms.security.model.LoginStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+@Service
+public class AuthenticationSuccess implements AuthenticationSuccessHandler, LogoutSuccessHandler {
+
+<span class="fc" id="L21">    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationSuccess.class);</span>
+
+    private final ObjectMapper mapper;
+
+    @Autowired
+<span class="fc" id="L26">    public AuthenticationSuccess(ObjectMapper mapper) {</span>
+<span class="fc" id="L27">        this.mapper = mapper;</span>
+<span class="fc" id="L28">    }</span>
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+                                        Authentication authentication) throws IOException {
+<span class="nc" id="L33">        final String username = getUsername(authentication);</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L35">            LOG.trace(&quot;Successfully authenticated user {}&quot;, username);</span>
+        }
+<span class="nc" id="L37">        final LoginStatus loginStatus = new LoginStatus(true, authentication.isAuthenticated(), username, null);</span>
+<span class="nc" id="L38">        mapper.writeValue(httpServletResponse.getOutputStream(), loginStatus);</span>
+<span class="nc" id="L39">    }</span>
+
+    private String getUsername(Authentication authentication) {
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (authentication == null) {</span>
+<span class="nc" id="L43">            return &quot;&quot;;</span>
+        }
+<span class="nc" id="L45">        return ((AccountDetails) authentication.getPrincipal()).getUsername();</span>
+    }
+
+
+    @Override
+    public void onLogoutSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+                                Authentication authentication) throws IOException {
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if (LOG.isTraceEnabled()) {</span>
+<span class="nc" id="L53">            LOG.trace(&quot;Successfully logged out user {}&quot;, getUsername(authentication));</span>
+        }
+<span class="nc" id="L55">        final LoginStatus loginStatus = new LoginStatus(false, true, null, null);</span>
+<span class="nc" id="L56">        mapper.writeValue(httpServletResponse.getOutputStream(), loginStatus);</span>
+<span class="nc" id="L57">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

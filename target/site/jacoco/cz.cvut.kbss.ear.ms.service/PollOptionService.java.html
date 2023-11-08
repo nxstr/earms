@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PollOptionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.service</a> &gt; <span class="el_source">PollOptionService.java</span></div><h1>PollOptionService.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.service;
+
+import cz.cvut.kbss.ear.ms.dao.PollOptionDao;
+import cz.cvut.kbss.ear.ms.dao.UserDao;
+import cz.cvut.kbss.ear.ms.exceptions.DateValidationException;
+import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
+import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
+import cz.cvut.kbss.ear.ms.model.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Objects;
+
+@Service
+public class PollOptionService {
+    private final PollOptionDao dao;
+    private final UserDao userDao;
+    private final VoteService voteService;
+
+    @Autowired
+<span class="fc" id="L23">    public PollOptionService(PollOptionDao dao, UserDao userDao, VoteService voteService) {</span>
+<span class="fc" id="L24">        this.dao = dao;</span>
+<span class="fc" id="L25">        this.userDao = userDao;</span>
+<span class="fc" id="L26">        this.voteService = voteService;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Transactional
+    public PollOption persist(PollOption pollOption, Event event){
+<span class="nc" id="L31">        Objects.requireNonNull(event);</span>
+<span class="nc" id="L32">        Objects.requireNonNull(pollOption);</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        for(PollOption p: event.getOptions()){</span>
+<span class="nc bnc" id="L34" title="All 4 branches missed.">            if(Objects.equals(p.getDateSlot(), pollOption.getDateSlot()) &amp;&amp; Objects.equals(p.getTimeSlot(), pollOption.getTimeSlot())){</span>
+<span class="nc" id="L35">                throw new ExistsException(&quot;Same date is already exist in this event&quot;);</span>
+            }
+<span class="nc" id="L37">        }</span>
+<span class="nc" id="L38">        pollOption.setEvent(event);</span>
+<span class="nc" id="L39">        dao.persist(pollOption);</span>
+<span class="nc" id="L40">        return pollOption;</span>
+    }
+
+    @Transactional
+    public PollOption setFinal(PollOption pollOption){
+<span class="fc" id="L45">        Objects.requireNonNull(pollOption);</span>
+<span class="fc" id="L46">        Event event = pollOption.getEvent();</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if(event.getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L48">            throw new DateValidationException(&quot;Event is already closed!&quot;);</span>
+        }
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        for(PollOption p: event.getOptions()){</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">            if(p.getIsFinal()){</span>
+<span class="fc" id="L52">                p.setIsFinal(false);</span>
+            }
+<span class="fc" id="L54">        }</span>
+<span class="fc" id="L55">        pollOption.setIsFinal(true);</span>
+<span class="fc" id="L56">        dao.update(pollOption);</span>
+<span class="fc" id="L57">        return pollOption;</span>
+    }
+
+    @Transactional(readOnly = true)
+    public PollOption findFinalForEvent(Event event){
+<span class="fc" id="L62">        Objects.requireNonNull(event);</span>
+<span class="fc" id="L63">        return dao.findFinalForEvent(event);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public PollOption find(Integer id){
+<span class="nc" id="L68">        PollOption pollOption = dao.find(id);</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if(pollOption==null) {</span>
+<span class="nc" id="L70">            throw new NotFoundException(&quot;Polloption with this id s not found&quot;);</span>
+        }
+<span class="nc" id="L72">        return pollOption;</span>
+    }
+
+    @Transactional
+    public void addVote(PollOption pollOption, Vote vote, User user){
+<span class="nc" id="L77">        Objects.requireNonNull(vote);</span>
+<span class="nc" id="L78">        Objects.requireNonNull(pollOption);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if(pollOption.getEvent().getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L80">            throw new DateValidationException(&quot;Event is already closed&quot;);</span>
+        }
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for(User u:pollOption.getEvent().getGuests()){</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if(Objects.equals(u.getId(), user.getId())){</span>
+<span class="nc" id="L84">                vote.setGuest(user);</span>
+<span class="nc" id="L85">                vote.setPollOption(pollOption);</span>
+<span class="nc" id="L86">                voteService.persist(pollOption, vote);</span>
+<span class="nc" id="L87">                return;</span>
+            }
+<span class="nc" id="L89">        }</span>
+<span class="nc" id="L90">        throw new NotFoundException(&quot;This user is not a guest for event&quot;);</span>
+    }
+
+    @Transactional
+    public void removeVote(PollOption pollOption, Vote vote){
+<span class="nc" id="L95">        Objects.requireNonNull(vote);</span>
+<span class="nc" id="L96">        Objects.requireNonNull(pollOption);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if(pollOption.getEvent().getOpenDueTo().isBefore(LocalDate.now())){</span>
+<span class="nc" id="L98">            throw new DateValidationException(&quot;Event is already closed&quot;);</span>
+        }
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        for(User u:pollOption.getEvent().getGuests()){</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if(Objects.equals(u.getId(), vote.getGuest().getId())){</span>
+<span class="nc" id="L102">                u.getVotes().remove(vote);</span>
+<span class="nc" id="L103">                userDao.update(u);</span>
+<span class="nc" id="L104">                pollOption.getVotes().remove(vote);</span>
+<span class="nc" id="L105">                dao.update(pollOption);</span>
+<span class="nc" id="L106">                voteService.delete(vote);</span>
+<span class="nc" id="L107">                return;</span>
+            }
+<span class="nc" id="L109">        }</span>
+<span class="nc" id="L110">    }</span>
+
+    @Transactional
+    public Integer countPositiveVotes(PollOption pollOption){
+<span class="fc" id="L114">        int count = 0;</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        for(Vote v: pollOption.getVotes()){</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">            if(v.getVoteType() == VoteType.POSITIVE){</span>
+<span class="nc" id="L117">                count++;</span>
+            }
+<span class="nc" id="L119">        }</span>
+<span class="fc" id="L120">        return count;</span>
+    }
+
+    @Transactional
+    public void delete(PollOption pollOption){
+<span class="nc" id="L125">        Objects.requireNonNull(pollOption);</span>
+//        while(pollOption.getVotes().size()!=0){
+//            Vote vote = pollOption.getVotes().get(pollOption.getVotes().size() - 1);
+//            voteService.delete(vote);
+//            pollOption.getVotes().remove(vote);
+//        }
+<span class="nc" id="L131">        dao.remove(pollOption);</span>
+<span class="nc" id="L132">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

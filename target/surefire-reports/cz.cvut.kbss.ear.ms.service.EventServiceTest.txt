@@ -1,0 +1,18 @@
+-------------------------------------------------------------------------------
+Test set: cz.cvut.kbss.ear.ms.service.EventServiceTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 0, Errors: 3, Skipped: 0, Time elapsed: 0.215 s <<< FAILURE! - in cz.cvut.kbss.ear.ms.service.EventServiceTest
+findAllNotVotedEvents_findsAllNotVoted  Time elapsed: 0.03 s  <<< ERROR!
+cz.cvut.kbss.ear.ms.exceptions.DateValidationException: Event is already closed
+	at cz.cvut.kbss.ear.ms.service.EventServiceTest.generateTestData(EventServiceTest.java:223)
+	at cz.cvut.kbss.ear.ms.service.EventServiceTest.findAllNotVotedEvents_findsAllNotVoted(EventServiceTest.java:177)
+
+addRegisteredUserAsAGuestAddsUser  Time elapsed: 0.021 s  <<< ERROR!
+cz.cvut.kbss.ear.ms.exceptions.DateValidationException: Event is already closed
+	at cz.cvut.kbss.ear.ms.service.EventServiceTest.addRegisteredUserAsAGuestAddsUser(EventServiceTest.java:44)
+
+findAllActiveGuestEvents_findsAllActive  Time elapsed: 0.014 s  <<< ERROR!
+cz.cvut.kbss.ear.ms.exceptions.DateValidationException: Event is already closed
+	at cz.cvut.kbss.ear.ms.service.EventServiceTest.generateTestData(EventServiceTest.java:222)
+	at cz.cvut.kbss.ear.ms.service.EventServiceTest.findAllActiveGuestEvents_findsAllActive(EventServiceTest.java:161)
+

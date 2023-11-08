@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PollOptionController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.rest</a> &gt; <span class="el_source">PollOptionController.java</span></div><h1>PollOptionController.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.rest;
+
+import cz.cvut.kbss.ear.ms.exceptions.DateValidationException;
+import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
+import cz.cvut.kbss.ear.ms.model.PollOption;
+import cz.cvut.kbss.ear.ms.model.User;
+import cz.cvut.kbss.ear.ms.model.Vote;
+import cz.cvut.kbss.ear.ms.security.model.AuthenticationToken;
+import cz.cvut.kbss.ear.ms.service.PollOptionService;
+import cz.cvut.kbss.ear.ms.service.UserService;
+import cz.cvut.kbss.ear.ms.service.VoteService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.Objects;
+
+@RestController
+@RequestMapping(&quot;/rest/event&quot;)
+public class PollOptionController {
+
+
+<span class="fc" id="L27">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
+
+    private final PollOptionService pollOptionService;
+    private final UserService userService;
+    private final VoteService voteService;
+
+
+<span class="fc" id="L34">    public PollOptionController(PollOptionService pollOptionService, UserService userService, VoteService voteService) {</span>
+<span class="fc" id="L35">        this.pollOptionService = pollOptionService;</span>
+<span class="fc" id="L36">        this.userService = userService;</span>
+<span class="fc" id="L37">        this.voteService = voteService;</span>
+<span class="fc" id="L38">    }</span>
+
+    @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+    @PostMapping(value = &quot;/options/final/{option_id}&quot;)
+    public ResponseEntity&lt;String&gt; setFinal(Principal principal, @PathVariable Integer option_id) {
+        try {
+<span class="nc" id="L44">            User user = getUser(principal);</span>
+<span class="nc" id="L45">            PollOption pollOption = pollOptionService.find(option_id);</span>
+
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if(!Objects.equals(user.getId(), pollOption.getEvent().getOwner().getId())){</span>
+<span class="nc" id="L48">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, pollOption.getEvent().getId(), user.getId());</span>
+<span class="nc" id="L49">                return new ResponseEntity&lt;&gt;(&quot;This user does not belong to current event&quot;, HttpStatus.FORBIDDEN);</span>
+            }
+<span class="nc" id="L51">            PollOption pollOption1 = pollOptionService.setFinal(pollOption);</span>
+<span class="nc" id="L52">            LOG.debug(&quot;PollOption {} set to final.&quot;, pollOption1.getId());</span>
+<span class="nc" id="L53">            return new ResponseEntity&lt;&gt;(pollOption.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L54">        }catch (NotFoundException e){</span>
+<span class="nc" id="L55">            LOG.debug(&quot;User {} is trying get unexisting pollOption {}&quot;, getUser(principal).getId(), option_id);</span>
+<span class="nc" id="L56">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L57">        }catch (DateValidationException e){</span>
+<span class="nc" id="L58">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+    @PostMapping(value = &quot;/options/{id}/votes/add&quot;)
+    public ResponseEntity&lt;String&gt; addVote(Principal principal, @PathVariable Integer id, @RequestBody Vote vote) {
+        try {
+<span class="nc" id="L66">            User user = getUser(principal);</span>
+<span class="nc" id="L67">            PollOption pollOption = pollOptionService.find(id);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (Objects.equals(user.getId(), pollOption.getEvent().getOwner().getId())) {</span>
+<span class="nc" id="L69">                LOG.debug(&quot;Owner is trying to add vote to event {}.&quot;, pollOption.getEvent().getId());</span>
+<span class="nc" id="L70">                return new ResponseEntity&lt;&gt;(&quot;Owner can not add or remove votes&quot;, HttpStatus.FORBIDDEN);</span>
+            }
+<span class="nc" id="L72">            pollOptionService.addVote(pollOption, vote, user);</span>
+<span class="nc" id="L73">            LOG.debug(&quot;Votes(s) successfully added to pollOption{}.&quot;, pollOption.getId());</span>
+<span class="nc" id="L74">            return new ResponseEntity&lt;&gt;(pollOption.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L75">        }catch (NotFoundException e){</span>
+<span class="nc" id="L76">            LOG.debug(&quot;User {} is trying to add unexisting pollOption {}&quot;, getUser(principal).getId(), id);</span>
+<span class="nc" id="L77">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+        }
+    }
+
+    @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+    @DeleteMapping(value = &quot;/options/{id}/votes/delete/{vote_id}&quot;)
+    public ResponseEntity&lt;String&gt; removeVote(Principal principal, @PathVariable Integer id, @PathVariable Integer vote_id) {
+        try {
+<span class="nc" id="L85">            User user = getUser(principal);</span>
+<span class="nc" id="L86">            PollOption pollOption = pollOptionService.find(id);</span>
+<span class="nc" id="L87">            Vote vote = voteService.find(vote_id);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">            if (Objects.equals(user.getId(), pollOption.getEvent().getOwner().getId())) {</span>
+<span class="nc" id="L89">                LOG.debug(&quot;Owner is trying to remove vote to event {}.&quot;, pollOption.getEvent().getId());</span>
+<span class="nc" id="L90">                return new ResponseEntity&lt;&gt;(&quot;Owner can not add or remove votes&quot;, HttpStatus.FORBIDDEN);</span>
+            }
+<span class="nc" id="L92">            pollOptionService.removeVote(pollOption, vote);</span>
+<span class="nc" id="L93">            LOG.debug(&quot;Votes successfully deleted from pollOption{}.&quot;, pollOption.getId());</span>
+<span class="nc" id="L94">            return new ResponseEntity&lt;&gt;(&quot;Successfully deleted vote&quot;, HttpStatus.OK);</span>
+<span class="nc" id="L95">        }catch (NotFoundException e){</span>
+<span class="nc" id="L96">            LOG.debug(&quot;User {} is trying to remove unexisting pollOption {} or vote {}&quot;, getUser(principal).getId(), id, vote_id);</span>
+<span class="nc" id="L97">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+        }
+    }
+
+    private User getUser(Principal principal){
+<span class="nc" id="L102">        final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L103">        Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L104">        return userService.find(id);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

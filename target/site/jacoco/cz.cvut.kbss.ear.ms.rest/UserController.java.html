@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.rest</a> &gt; <span class="el_source">UserController.java</span></div><h1>UserController.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.rest;
+
+import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
+import cz.cvut.kbss.ear.ms.model.User;
+import cz.cvut.kbss.ear.ms.security.model.AuthenticationToken;
+import cz.cvut.kbss.ear.ms.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+
+@RestController
+@RequestMapping(&quot;/rest/users&quot;)
+public class UserController {
+
+<span class="fc" id="L21">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
+
+    private final UserService userService;
+
+    @Autowired
+<span class="fc" id="L26">    public UserController(UserService userService) {</span>
+<span class="fc" id="L27">        this.userService = userService;</span>
+<span class="fc" id="L28">    }</span>
+
+    /**
+     * Registers a new user.
+     *
+     * @param user User data
+     */
+    @PreAuthorize(&quot;anonymous || hasRole('ROLE_ADMIN')&quot;)
+    @RequestMapping(value = &quot;/register&quot;)
+    public ResponseEntity&lt;String&gt; register(@RequestBody User user) {
+        try {
+<span class="nc" id="L39">            User user1 = userService.persist(user);</span>
+<span class="nc" id="L40">            LOG.debug(&quot;User {} successfully registered.&quot;, user1.getUsername());</span>
+<span class="nc" id="L41">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.CREATED);</span>
+<span class="nc" id="L42">        }catch (ExistsException e){</span>
+<span class="nc" id="L43">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+
+    @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+    @PostMapping(value = &quot;/change/{email}&quot;)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity&lt;String&gt; changeCurrentUserEmail(Principal principal, @PathVariable String email){
+        try {
+<span class="nc" id="L53">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L54">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L55">            User user = userService.find(id);</span>
+<span class="nc" id="L56">            userService.changeCurrentUserEmail(user, email);</span>
+<span class="nc" id="L57">            LOG.debug(&quot;User {} changed email {}.&quot;, user.getUsername(), email);</span>
+<span class="nc" id="L58">            return new ResponseEntity&lt;&gt;(user.toString(), HttpStatus.NO_CONTENT);</span>
+<span class="nc" id="L59">        }catch (ExistsException e){</span>
+<span class="nc" id="L60">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @PreAuthorize(&quot;hasRole('ROLE_ADMIN') || hasRole('ROLE_USER')&quot;)
+    @PostMapping(value = &quot;/update&quot;)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity&lt;String&gt; update(Principal principal, @RequestBody User user){
+        try {
+<span class="nc" id="L69">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L70">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L71">            User user1 = userService.update(user, id);</span>
+<span class="nc" id="L72">            LOG.debug(&quot;User {} changed data.&quot;, user1.getId());</span>
+<span class="nc" id="L73">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L74">        }catch (ExistsException e){</span>
+<span class="nc" id="L75">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
