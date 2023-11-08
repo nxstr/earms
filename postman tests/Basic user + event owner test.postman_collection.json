@@ -1,0 +1,948 @@
+{
+	"info": {
+		"_postman_id": "8087da48-d484-41da-9147-e7500cecbf9b",
+		"name": "Basic user + event owner test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25170128"
+	},
+	"item": [
+		{
+			"name": "login user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"testing\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"testing\",\r\n    \"password\":\"pass111\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"auth",
+						"login"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "user1",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "admin6",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get current user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"id = 1654\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"username = testing\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"firstName = Jack\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"lastName = Sparrow\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"email = usern1@user.user\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/current",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"current"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"id = 1654\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"username = usrn1\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"firstName = Jack\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"lastName = Sparrow\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"email = usern1@user.user\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"@type\":\"user1\",\r\n    \"username\":\"usrn1\",\r\n    \"password\":\"pass111\",\r\n    \"firstName\":\"Jack\",\r\n    \"lastName\":\"Sparrow\",\r\n    \"email\":\"usern1@user.user\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all active events",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/active",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"active"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user 2 (data is back)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"id = 1654\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"username = testing\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"firstName = Jack\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"lastName = Sparrow\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"email = usern1@user.user\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"@type\":\"user1\",\r\n    \"username\":\"testing\",\r\n    \"password\":\"pass111\",\r\n    \"firstName\":\"Jack\",\r\n    \"lastName\":\"Sparrow\",\r\n    \"email\":\"usern1@user.user\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.json();\r",
+							"pm.collectionVariables.set(\"eventId\", responseObject.id);\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Global var eventId is not null\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\":\"first event\",\r\n        \"detail\":\"bla bla bla\",\r\n        \"location\":\"Praha 9 neco\",\r\n        \"openDueTo\":\"2023-03-28\"\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get Event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"options{\");\r",
+							"idx+=21;\r",
+							"var idx1 = responseObject.indexOf(\", dateSlot=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"optionId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"optionId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"const responseObject1 = pm.response.text();\r",
+							"var idx = responseObject1.indexOf(\"guests{\");\r",
+							"idx+=20;\r",
+							"var idx1 = responseObject1.indexOf(\", username=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"guestId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"guestId\", responseObject1.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update Event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// const responseObject = pm.response.text();\r",
+							"// var idx = responseObject.indexOf(\"Event{\\n    id = \");\r",
+							"// idx+=19;\r",
+							"// var idx1 = responseObject.indexOf(\"    name=\");\r",
+							"// if(idx1==-1){\r",
+							"//     pm.collectionVariables.set(\"eventId\", 0);\r",
+							"// }else{\r",
+							"// pm.collectionVariables.set(\"eventId\", responseObject.substring(idx, idx1));\r",
+							"// }\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\":\"first event update\",\r\n        \"detail\":\"bla bla bla\",\r\n        \"location\":\"Praha 9 neco\",\r\n        \"openDueTo\":\"2023-01-23\"\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"update"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add pollOptions to event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"options{\");\r",
+							"idx+=21;\r",
+							"var idx1 = responseObject.indexOf(\", dateSlot=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"optionId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"optionId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"dateSlot=2023-02-28, timeSlot=16:00, isFinal=false\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"dateSlot=2023-02-12, timeSlot=16:00, isFinal=false\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"dateSlot=2023-03-01, timeSlot=16:00, isFinal=false\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n        {\r\n        \"dateSlot\":\"2023-02-28\",\r\n        \"timeSlot\":\"16:00:00\"\r\n    },\r\n            {\r\n        \"dateSlot\":\"2023-02-12\",\r\n        \"timeSlot\":\"16:00:00\"\r\n    },\r\n            {\r\n        \"dateSlot\":\"2023-03-01\",\r\n        \"timeSlot\":\"16:00:00\"\r\n    }\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/options",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"options"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remove pollOption from event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"options{\");\r",
+							"idx+=21;\r",
+							"var idx1 = responseObject.indexOf(\", dateSlot=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"optionId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"optionId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"optionId\")!=pm.collectionVariables.get(\"opt\"));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"opt\", pm.globals.get(\"optionId\"));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/options/{{optionId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"options",
+						"{{optionId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add Usernames",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"guests{\");\r",
+							"idx+=20;\r",
+							"var idx1 = responseObject.indexOf(\", username=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"guestId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"guestId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"username=username21, email=username21@user.user\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"username=21user21, email=21user21@user.user\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\"username21\", \"21user21\"]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/guests/add/registered",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"guests",
+						"add",
+						"registered"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add users By Emails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"guests{\");\r",
+							"idx+=20;\r",
+							"var idx1 = responseObject.indexOf(\", username=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"guestId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"guestId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"username=mstester, email=mstester@user.user\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\"mstester@user.user\"]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/guests/add/notregistered",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"guests",
+						"add",
+						"notregistered"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remove guest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"guests{\");\r",
+							"idx+=20;\r",
+							"var idx1 = responseObject.indexOf(\", username=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"guestId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"guestId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"guestId\")!=pm.collectionVariables.get(\"opt\"));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"opt\", pm.collectionVariables.get(\"guestId\"));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/guests/delete/{{guestId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"guests",
+						"delete",
+						"{{guestId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "make final poll option",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"isFinal=true\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/options/final/{{optionId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"options",
+						"final",
+						"{{optionId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "close Event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var day = new Date().getDate().valueOf()-1;\r",
+							"if(day<10){\r",
+							"    day = \"0\"+day;\r",
+							"}\r",
+							"var year = new Date().getFullYear();\r",
+							"var month = new Date().getMonth()+1;\r",
+							"if(month<10){\r",
+							"    month = \"0\"+month;\r",
+							"}\r",
+							"var date = year+\"-\"+month+\"-\"+day;\r",
+							"const responseObject2 = pm.response.text();\r",
+							"var idx = responseObject2.indexOf(\"openDueTo = \");\r",
+							"idx+=12;\r",
+							"var idx1 = responseObject2.indexOf(\"    location =\");\r",
+							"var d1 = responseObject2.substring(idx, idx1);\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(date==d1);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/close",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"close"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete event Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.json().loggedIn==false);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "eventId",
+			"value": ""
+		},
+		{
+			"key": "optionId",
+			"value": ""
+		},
+		{
+			"key": "guestId",
+			"value": ""
+		}
+	]
+}

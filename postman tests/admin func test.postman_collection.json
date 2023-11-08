@@ -1,0 +1,548 @@
+{
+	"info": {
+		"_postman_id": "126e698f-f1da-4a10-ad5e-e50e2dca30c3",
+		"name": "admin func test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25170128"
+	},
+	"item": [
+		{
+			"name": "login admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"admin6\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"admin6\",\r\n    \"password\":\"admin6\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "register",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"id = \");\r",
+							"idx+=5;\r",
+							"var idx1 = responseObject.indexOf(\"\\n    username\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"userId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"userId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"username = eartest1\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"firstName = eartest\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"lastName = eartest\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"email = eartest1@user.user\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"@type\":\"user1\",\r\n    \"username\":\"eartest1\",\r\n    \"password\":\"pass111\",\r\n    \"firstName\":\"eartest\",\r\n    \"lastName\":\"eartest\",\r\n    \"email\":\"eartest1@user.user\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create Admin",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var usrn = \"admintest\";\r",
+							"var num = Math.floor(Math.random() * 1000).toString();\r",
+							"var username = usrn+num;\r",
+							"\r",
+							"pm.collectionVariables.set(\"username\", username);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"id = \");\r",
+							"idx+=5;\r",
+							"var idx1 = responseObject.indexOf(\"\\n    username\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"accountId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"accountId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"@type\":\"admin\",\r\n    \"username\":\"{{username}}\",\r\n    \"password\":\"admint232\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/admin/createAdmin",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"admin",
+						"createAdmin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/admin/get/{{accountId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"admin",
+						"get",
+						"{{accountId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update Admin",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var usrn = \"admintest\";\r",
+							"var num = Math.floor(Math.random() * 1000).toString();\r",
+							"var username = usrn+num;\r",
+							"\r",
+							"pm.collectionVariables.set(\"username\", username);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"@type\":\"admin\",\r\n    \"username\":\"{{username}}\",\r\n    \"password\":\"admintest1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/admin/updateAdmin/{{accountId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"admin",
+						"updateAdmin",
+						"{{accountId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete Admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Successfully deleted\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/admin/deleteAdmin/{{accountId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"admin",
+						"deleteAdmin",
+						"{{accountId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var usrn = \"usertest\";\r",
+							"var num = Math.floor(Math.random() * 1000).toString();\r",
+							"var username = usrn+num;\r",
+							"\r",
+							"pm.collectionVariables.set(\"username\", username);\r",
+							"\r",
+							"var usrn1 = \"usertest@gmail.com\";\r",
+							"var num1 = Math.floor(Math.random() * 1000).toString();\r",
+							"var username1 = usrn1+num1;\r",
+							"\r",
+							"pm.collectionVariables.set(\"email\", username1);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"firstName = eartest1\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"lastName = eartest1\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"@type\":\"user1\",\r\n    \"username\":\"{{username}}\",\r\n    \"password\":\"pass111\",\r\n    \"firstName\":\"eartest1\",\r\n    \"lastName\":\"eartest1\",\r\n    \"email\":\"{{email}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/admin/updateUser/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"admin",
+						"updateUser",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get User Account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"firstName = eartest1\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"lastName = eartest1\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/admin/get/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"admin",
+						"get",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Successfully deleted\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/users/admin/deleteUser/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"users",
+						"admin",
+						"deleteUser",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.json().loggedIn==false);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "accountId",
+			"value": ""
+		},
+		{
+			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "userId",
+			"value": ""
+		}
+	]
+}

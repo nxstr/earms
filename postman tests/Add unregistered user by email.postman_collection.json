@@ -1,0 +1,262 @@
+{
+	"info": {
+		"_postman_id": "81f76f87-c8f0-416a-a9aa-7697c0291fde",
+		"name": "Add unregistered user by email",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25170128"
+	},
+	"item": [
+		{
+			"name": "login user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"testing\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"testing\",\r\n    \"password\":\"pass111\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"auth",
+						"login"
+					],
+					"query": [
+						{
+							"key": "username",
+							"value": "user1",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "admin6",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.json();\r",
+							"pm.collectionVariables.set(\"eventId\", responseObject.id);\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Global var eventId is not null\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n        \"name\":\"first event\",\r\n        \"detail\":\"bla bla bla\",\r\n        \"location\":\"Praha 9 neco\",\r\n        \"openDueTo\":\"2023-03-28\"\r\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "invite user to app",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseObject = pm.response.text();\r",
+							"var idx = responseObject.indexOf(\"guests{\");\r",
+							"idx+=20;\r",
+							"var idx1 = responseObject.indexOf(\", username=\");\r",
+							"if(idx1==-1){\r",
+							"    pm.collectionVariables.set(\"guestId\", 0);\r",
+							"}else{\r",
+							"pm.collectionVariables.set(\"guestId\", responseObject.substring(idx, idx1));\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.collectionVariables.get(\"eventId\")!=0);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[\"iryna.netreba@email.cz\"]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/guests/add/notregistered",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"guests",
+						"add",
+						"notregistered"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete event",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/rest/event/{{eventId}}/delete",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"rest",
+						"event",
+						"{{eventId}}",
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Body matches string\", function () {\r",
+							"    pm.expect(pm.response.json().loggedIn==false);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/ms/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ms",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "eventId",
+			"value": ""
+		},
+		{
+			"key": "guestId",
+			"value": ""
+		}
+	]
+}
