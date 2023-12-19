@@ -14,14 +14,14 @@ public abstract class BaseDao&lt;T&gt; implements GenericDao&lt;T&gt; {
 
     protected final Class&lt;T&gt; type;
 
-<span class="fc" id="L17">    protected BaseDao(Class&lt;T&gt; type) {</span>
-<span class="fc" id="L18">        this.type = type;</span>
-<span class="fc" id="L19">    }</span>
+<span class="nc" id="L17">    protected BaseDao(Class&lt;T&gt; type) {</span>
+<span class="nc" id="L18">        this.type = type;</span>
+<span class="nc" id="L19">    }</span>
 
     @Override
     public T find(Integer id) {
-<span class="fc" id="L23">        Objects.requireNonNull(id);</span>
-<span class="fc" id="L24">        return em.find(type, id);</span>
+<span class="nc" id="L23">        Objects.requireNonNull(id);</span>
+<span class="nc" id="L24">        return em.find(type, id);</span>
     }
 
     @Override
@@ -35,13 +35,13 @@ public abstract class BaseDao&lt;T&gt; implements GenericDao&lt;T&gt; {
 
     @Override
     public void persist(T entity) {
-<span class="fc" id="L38">        Objects.requireNonNull(entity);</span>
+<span class="nc" id="L38">        Objects.requireNonNull(entity);</span>
         try {
-<span class="fc" id="L40">            em.persist(entity);</span>
+<span class="nc" id="L40">            em.persist(entity);</span>
 <span class="nc" id="L41">        } catch (RuntimeException e) {</span>
 <span class="nc" id="L42">            throw new PersistenceException(e);</span>
-<span class="fc" id="L43">        }</span>
-<span class="fc" id="L44">    }</span>
+<span class="nc" id="L43">        }</span>
+<span class="nc" id="L44">    }</span>
 
     @Override
     public void persist(Collection&lt;T&gt; entities) {
@@ -58,9 +58,9 @@ public abstract class BaseDao&lt;T&gt; implements GenericDao&lt;T&gt; {
 
     @Override
     public T update(T entity) {
-<span class="fc" id="L61">        Objects.requireNonNull(entity);</span>
+<span class="nc" id="L61">        Objects.requireNonNull(entity);</span>
         try {
-<span class="fc" id="L63">            return em.merge(entity);</span>
+<span class="nc" id="L63">            return em.merge(entity);</span>
 <span class="nc" id="L64">        } catch (RuntimeException e) {</span>
 <span class="nc" id="L65">            throw new PersistenceException(e);</span>
         }

@@ -17,44 +17,44 @@ import java.util.Set;
 public class Event extends AbstractEntity{
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="fc" id="L20">    @Setter</span>
+<span class="nc" id="L20">    @Setter</span>
 <span class="nc" id="L21">    @Getter</span>
     private String name;
 
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="pc" id="L26">    @Setter @Getter</span>
+<span class="nc" id="L26">    @Setter @Getter</span>
     private String detail;
 
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="fc" id="L31">    @Setter @Getter</span>
+<span class="nc" id="L31">    @Setter @Getter</span>
     private LocalDate openDueTo;
 
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="pc" id="L36">    @Setter @Getter</span>
+<span class="nc" id="L36">    @Setter @Getter</span>
     private String location;
 
     @OneToMany(mappedBy = &quot;event&quot;, cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
-<span class="fc" id="L40">    @Setter @Getter</span>
+<span class="nc" id="L40">    @Setter @Getter</span>
     @OrderBy(&quot;dateSlot asc&quot;)
     private List&lt;PollOption&gt; options;
 
 
     @ManyToMany(mappedBy = &quot;guestEvents&quot;, cascade = {CascadeType.MERGE})
-<span class="fc" id="L46">    @Setter @Getter</span>
+<span class="nc" id="L46">    @Setter @Getter</span>
     private Set&lt;User&gt; guests;
 
     @JsonIgnore
     @ManyToOne(cascade = {CascadeType.MERGE})
-<span class="fc" id="L51">    @Setter @Getter</span>
+<span class="nc" id="L51">    @Setter @Getter</span>
     private User owner;
 
 
-<span class="fc" id="L55">    public Event(){</span>
+<span class="nc" id="L55">    public Event(){</span>
 
-<span class="fc" id="L57">    }</span>
+<span class="nc" id="L57">    }</span>
 
 <span class="nc" id="L59">    public Event(User owner, String name, String detail, LocalDate openDueTo) {</span>
 <span class="nc" id="L60">        this.name = name;</span>

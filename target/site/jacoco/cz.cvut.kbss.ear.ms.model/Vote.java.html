@@ -16,7 +16,7 @@ public class Vote extends AbstractEntity{
     private String comment;
 
     @Enumerated(EnumType.STRING)
-<span class="fc" id="L19">    @Setter @Getter</span>
+<span class="nc" id="L19">    @Setter @Getter</span>
     private VoteType voteType;
 
     @ManyToOne
@@ -27,15 +27,15 @@ public class Vote extends AbstractEntity{
 <span class="nc" id="L27">    @Setter @Getter</span>
     private PollOption pollOption;
 
-<span class="fc" id="L30">    public Vote() {</span>
-<span class="fc" id="L31">        this.voteType = VoteType.NEUTRAL;</span>
-<span class="fc" id="L32">    }</span>
+<span class="nc" id="L30">    public Vote() {</span>
+<span class="nc" id="L31">        this.voteType = VoteType.NEUTRAL;</span>
+<span class="nc" id="L32">    }</span>
 
-<span class="fc" id="L34">    public Vote(User guest, PollOption pollOption) {</span>
-<span class="fc" id="L35">        this.guest = guest;</span>
-<span class="fc" id="L36">        this.pollOption = pollOption;</span>
-<span class="fc" id="L37">        this.voteType = VoteType.NEUTRAL;</span>
-<span class="fc" id="L38">    }</span>
+<span class="nc" id="L34">    public Vote(User guest, PollOption pollOption) {</span>
+<span class="nc" id="L35">        this.guest = guest;</span>
+<span class="nc" id="L36">        this.pollOption = pollOption;</span>
+<span class="nc" id="L37">        this.voteType = VoteType.NEUTRAL;</span>
+<span class="nc" id="L38">    }</span>
 
     public String toString() {
 <span class="nc" id="L41">        return &quot;Vote{&quot; +</span>

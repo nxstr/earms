@@ -14,7 +14,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class SystemInitializer {
 
-<span class="fc" id="L17">    private static final Logger LOG = LoggerFactory.getLogger(SystemInitializer.class);</span>
+<span class="nc" id="L17">    private static final Logger LOG = LoggerFactory.getLogger(SystemInitializer.class);</span>
 
     /**
      * Default admin username
@@ -26,34 +26,34 @@ public class SystemInitializer {
     private final PlatformTransactionManager txManager;
 
     @Autowired
-<span class="fc" id="L29">    public SystemInitializer(AdminService adminService, PlatformTransactionManager txManager) {</span>
-<span class="fc" id="L30">        this.adminService = adminService;</span>
-<span class="fc" id="L31">        this.txManager = txManager;</span>
-<span class="fc" id="L32">    }</span>
+<span class="nc" id="L29">    public SystemInitializer(AdminService adminService, PlatformTransactionManager txManager) {</span>
+<span class="nc" id="L30">        this.adminService = adminService;</span>
+<span class="nc" id="L31">        this.txManager = txManager;</span>
+<span class="nc" id="L32">    }</span>
 
     @PostConstruct
     private void initSystem() {
-<span class="fc" id="L36">        TransactionTemplate txTemplate = new TransactionTemplate(txManager);</span>
-<span class="fc" id="L37">        txTemplate.execute((status) -&gt; {</span>
-<span class="fc" id="L38">            generateAdmin();</span>
-<span class="fc" id="L39">            return null;</span>
+<span class="nc" id="L36">        TransactionTemplate txTemplate = new TransactionTemplate(txManager);</span>
+<span class="nc" id="L37">        txTemplate.execute((status) -&gt; {</span>
+<span class="nc" id="L38">            generateAdmin();</span>
+<span class="nc" id="L39">            return null;</span>
         });
-<span class="fc" id="L41">    }</span>
+<span class="nc" id="L41">    }</span>
 
     /**
      * Generates an admin account if it does not already exist.
      */
     private void generateAdmin() {
-<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (adminService.exists(ADMIN_USERNAME)) {</span>
-<span class="fc" id="L48">            return;</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (adminService.exists(ADMIN_USERNAME)) {</span>
+<span class="nc" id="L48">            return;</span>
         }
-<span class="fc" id="L50">        final Admin admin = new Admin();</span>
-<span class="fc" id="L51">        admin.setUsername(ADMIN_USERNAME);</span>
-<span class="fc" id="L52">        admin.setPassword(&quot;admin6&quot;);</span>
-<span class="fc" id="L53">        admin.setRole(Role.ADMIN);</span>
-<span class="fc" id="L54">        LOG.info(&quot;Generated admin user with credentials &quot; + admin.getUsername() + &quot;/&quot; + admin.getPassword());</span>
-<span class="fc" id="L55">        adminService.persist(admin);</span>
-<span class="fc" id="L56">    }</span>
+<span class="nc" id="L50">        final Admin admin = new Admin();</span>
+<span class="nc" id="L51">        admin.setUsername(ADMIN_USERNAME);</span>
+<span class="nc" id="L52">        admin.setPassword(&quot;admin6&quot;);</span>
+<span class="nc" id="L53">        admin.setRole(Role.ADMIN);</span>
+<span class="nc" id="L54">        LOG.info(&quot;Generated admin user with credentials &quot; + admin.getUsername() + &quot;/&quot; + admin.getPassword());</span>
+<span class="nc" id="L55">        adminService.persist(admin);</span>
+<span class="nc" id="L56">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

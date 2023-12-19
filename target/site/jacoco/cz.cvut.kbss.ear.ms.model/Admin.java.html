@@ -7,9 +7,9 @@ import javax.persistence.*;
 @DiscriminatorValue(&quot;ADMIN&quot;)
 public class Admin extends Account {
 
-<span class="fc" id="L10">    public Admin(){</span>
-<span class="fc" id="L11">        setRole(Role.ADMIN);</span>
-<span class="fc" id="L12">    }</span>
+<span class="nc" id="L10">    public Admin(){</span>
+<span class="nc" id="L11">        setRole(Role.ADMIN);</span>
+<span class="nc" id="L12">    }</span>
 
     public Admin(String username, String password){
 <span class="nc" id="L15">        super(username, password);</span>

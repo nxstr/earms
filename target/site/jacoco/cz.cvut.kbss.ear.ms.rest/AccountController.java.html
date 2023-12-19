@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="uk"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AccountController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">ear-semestral-meeting-scheduler</a> &gt; <a href="index.source.html" class="el_package">cz.cvut.kbss.ear.ms.rest</a> &gt; <span class="el_source">AccountController.java</span></div><h1>AccountController.java</h1><pre class="source lang-java linenums">package cz.cvut.kbss.ear.ms.rest;
 
+import cz.cvut.kbss.ear.ms.dto.AccountDto;
 import cz.cvut.kbss.ear.ms.model.Account;
 import cz.cvut.kbss.ear.ms.model.Admin;
 import cz.cvut.kbss.ear.ms.model.User;
@@ -21,57 +22,57 @@ import java.security.Principal;
 @RequestMapping(&quot;/rest/users&quot;)
 public class AccountController {
 
-<span class="fc" id="L24">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
+<span class="nc" id="L25">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
 
     private final AdminService adminService;
     private final UserService userService;
 
     @Autowired
-<span class="fc" id="L30">    public AccountController(AdminService adminService, UserService userService) {</span>
-<span class="fc" id="L31">        this.adminService = adminService;</span>
-<span class="fc" id="L32">        this.userService = userService;</span>
-<span class="fc" id="L33">    }</span>
+<span class="nc" id="L31">    public AccountController(AdminService adminService, UserService userService) {</span>
+<span class="nc" id="L32">        this.adminService = adminService;</span>
+<span class="nc" id="L33">        this.userService = userService;</span>
+<span class="nc" id="L34">    }</span>
 
     @PreAuthorize(&quot;hasAnyRole('ROLE_ADMIN', 'ROLE_USER')&quot;)
     @GetMapping(value = &quot;/current&quot;)
-    public String getCurrent(Principal principal) {
-<span class="nc" id="L38">        final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L39">        Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L40">        Account acc = userService.findById(id);</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">        if(acc==null){</span>
-<span class="nc" id="L42">            acc = adminService.findById(id);</span>
+    public AccountDto getCurrent(Principal principal) {
+<span class="nc" id="L39">        final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L40">        Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L41">        Account acc = userService.findById(id);</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        if(acc==null){</span>
+<span class="nc" id="L43">            acc = adminService.findById(id);</span>
         }
-<span class="nc" id="L44">        return acc.toString();</span>
+<span class="nc" id="L45">        return new AccountDto(acc.getId(), acc.getUsername(), null, acc.getRole().toString());</span>
     }
 
     @PreAuthorize(&quot;hasAnyRole('ROLE_ADMIN')&quot;)
     @GetMapping(value = &quot;/admin/get/{id}&quot;)
-    public String getAccount(@PathVariable Integer id) {
-<span class="nc" id="L50">        Account acc = userService.findById(id);</span>
-<span class="nc bnc" id="L51" title="All 2 branches missed.">        if(acc==null){</span>
-<span class="nc" id="L52">            acc = adminService.findById(id);</span>
-<span class="nc bnc" id="L53" title="All 2 branches missed.">            if(acc==null){</span>
-<span class="nc" id="L54">                return &quot;Username with id &quot; + id + &quot; does not exist&quot;;</span>
+    public AccountDto getAccount(@PathVariable Integer id) {
+<span class="nc" id="L51">        Account acc = userService.findById(id);</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if(acc==null){</span>
+<span class="nc" id="L53">            acc = adminService.findById(id);</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if(acc==null){</span>
+<span class="nc" id="L55">                return new AccountDto(null, null, null, null);</span>
             }
         }
-<span class="nc" id="L57">        return acc.toString();</span>
+<span class="nc" id="L58">        return new AccountDto(acc.getId(), acc.getUsername(), null, acc.getRole().toString());</span>
     }
 
     @PreAuthorize(&quot;hasRole('ROLE_ADMIN') || hasRole('ROLE_USER')&quot;)
-    @PostMapping(value = &quot;/{username}&quot;)
-    public ResponseEntity&lt;String&gt; changeCurrentUserUsername(Principal principal, @PathVariable String username){
-<span class="nc" id="L63">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L64">            Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L65">            User user = userService.findById(id);</span>
-<span class="nc bnc" id="L66" title="All 2 branches missed.">            if (user == null) {</span>
-<span class="nc" id="L67">                Admin user1 = adminService.find(id);</span>
-<span class="nc" id="L68">                adminService.changeCurrentPersonUsername(id, username);</span>
-<span class="nc" id="L69">                LOG.debug(&quot;User {} changed username {}.&quot;, user1.getId(), username);</span>
-<span class="nc" id="L70">                return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.OK);</span>
+    @PutMapping(value = &quot;/changeUname&quot;)
+    public ResponseEntity&lt;String&gt; changeCurrentUserUsername(Principal principal, @RequestBody String username){
+<span class="nc" id="L64">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L65">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L66">            User user = userService.findById(id);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">            if (user == null) {</span>
+<span class="nc" id="L68">                Admin user1 = adminService.find(id);</span>
+<span class="nc" id="L69">                adminService.changeCurrentPersonUsername(id, username);</span>
+<span class="nc" id="L70">                LOG.debug(&quot;User {} changed username {}.&quot;, user1.getId(), username);</span>
+<span class="nc" id="L71">                return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.OK);</span>
             }
-<span class="nc" id="L72">            userService.changeCurrentPersonUsername(id, username);</span>
-<span class="nc" id="L73">            LOG.debug(&quot;User {} changed username {}.&quot;, user.getEmail(), username);</span>
-<span class="nc" id="L74">            return new ResponseEntity&lt;&gt;(user.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L73">            userService.changeCurrentPersonUsername(id, username);</span>
+<span class="nc" id="L74">            LOG.debug(&quot;User {} changed username {}.&quot;, user.getEmail(), username);</span>
+<span class="nc" id="L75">            return new ResponseEntity&lt;&gt;(user.toString(), HttpStatus.OK);</span>
     }
 }
 

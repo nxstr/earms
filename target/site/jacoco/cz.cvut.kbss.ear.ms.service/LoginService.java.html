@@ -19,10 +19,10 @@ public class LoginService {
     private final AccountDetailsService userDetailsService;
 
     @Autowired
-<span class="fc" id="L22">    public LoginService(DefaultAuthenticationProvider provider, AccountDetailsService userDetailsService) {</span>
-<span class="fc" id="L23">        this.provider = provider;</span>
-<span class="fc" id="L24">        this.userDetailsService = userDetailsService;</span>
-<span class="fc" id="L25">    }</span>
+<span class="nc" id="L22">    public LoginService(DefaultAuthenticationProvider provider, AccountDetailsService userDetailsService) {</span>
+<span class="nc" id="L23">        this.provider = provider;</span>
+<span class="nc" id="L24">        this.userDetailsService = userDetailsService;</span>
+<span class="nc" id="L25">    }</span>
 
     @Transactional
     public void loginUser (String username, String password) throws ExistsException {

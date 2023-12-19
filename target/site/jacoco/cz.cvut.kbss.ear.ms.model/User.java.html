@@ -19,37 +19,37 @@ public class User extends Account {
 
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="fc" id="L22">    @Setter</span>
+<span class="nc" id="L22">    @Setter</span>
 <span class="nc" id="L23">    @Getter</span>
     private String firstName;
 
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="pc" id="L28">    @Setter @Getter</span>
+<span class="nc" id="L28">    @Setter @Getter</span>
     private String lastName;
 
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="fc" id="L33">    @Setter @Getter</span>
+<span class="nc" id="L33">    @Setter @Getter</span>
     private String email;
 
     @OneToMany(mappedBy = &quot;owner&quot;, cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
-<span class="pc" id="L37">    @Setter @Getter</span>
+<span class="nc" id="L37">    @Setter @Getter</span>
     private Set&lt;Event&gt; ownedEvents;
 
     @ManyToMany(cascade = {CascadeType.MERGE})
-<span class="fc" id="L41">    @Setter @Getter</span>
+<span class="nc" id="L41">    @Setter @Getter</span>
     @OrderBy(&quot;name asc&quot;)
     private Set&lt;Event&gt; guestEvents;
 
     @OneToMany(mappedBy = &quot;guest&quot;, cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
-<span class="fc" id="L46">    @Setter @Getter</span>
+<span class="nc" id="L46">    @Setter @Getter</span>
     @OrderBy(&quot;id&quot;)
     private List&lt;Vote&gt; votes;
 
-<span class="fc" id="L50">    public User() {</span>
-<span class="fc" id="L51">        setRole(Role.USER);</span>
-<span class="fc" id="L52">    }</span>
+<span class="nc" id="L50">    public User() {</span>
+<span class="nc" id="L51">        setRole(Role.USER);</span>
+<span class="nc" id="L52">    }</span>
 
     public User(String username, String password, String email, String firstName, String lastName) {
 <span class="nc" id="L55">        super(username, password);</span>

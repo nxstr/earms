@@ -18,7 +18,7 @@ import java.util.List;
 public class PollOption extends AbstractEntity{
     @Basic(optional = false)
     @Column(nullable = false)
-<span class="pc" id="L21">    @Setter @Getter</span>
+<span class="nc" id="L21">    @Setter @Getter</span>
     private LocalDate dateSlot;
 
     @Basic(optional = false)
@@ -27,30 +27,30 @@ public class PollOption extends AbstractEntity{
     private LocalTime timeSlot;
 
 
-<span class="fc" id="L30">    @Basic(optional = false)</span>
+<span class="nc" id="L30">    @Basic(optional = false)</span>
     @Column(nullable = false)
-<span class="fc" id="L32">    @Setter @Getter</span>
-<span class="fc" id="L33">    private Boolean isFinal = false;</span>
+<span class="nc" id="L32">    @Setter @Getter</span>
+<span class="nc" id="L33">    private Boolean isFinal = false;</span>
 
     @JsonIgnore
     @ManyToOne
-<span class="pc" id="L37">    @Setter @Getter</span>
+<span class="nc" id="L37">    @Setter @Getter</span>
     private Event event;
 
     @OneToMany(mappedBy = &quot;pollOption&quot;, cascade = {CascadeType.REMOVE}, orphanRemoval = true)
-<span class="fc" id="L41">    @Setter</span>
-<span class="fc" id="L42">    @Getter</span>
+<span class="nc" id="L41">    @Setter</span>
+<span class="nc" id="L42">    @Getter</span>
     @OrderBy(&quot;voteType asc&quot;)
     private List&lt;Vote&gt; votes;
 
-<span class="fc" id="L46">    public PollOption() {</span>
-<span class="fc" id="L47">    }</span>
+<span class="nc" id="L46">    public PollOption() {</span>
+<span class="nc" id="L47">    }</span>
 
-<span class="fc" id="L49">    public PollOption(LocalDate dateSlot, LocalTime timeSlot, Event event) {</span>
-<span class="fc" id="L50">        this.dateSlot = dateSlot;</span>
-<span class="fc" id="L51">        this.timeSlot = timeSlot;</span>
-<span class="fc" id="L52">        this.event = event;</span>
-<span class="fc" id="L53">    }</span>
+<span class="nc" id="L49">    public PollOption(LocalDate dateSlot, LocalTime timeSlot, Event event) {</span>
+<span class="nc" id="L50">        this.dateSlot = dateSlot;</span>
+<span class="nc" id="L51">        this.timeSlot = timeSlot;</span>
+<span class="nc" id="L52">        this.event = event;</span>
+<span class="nc" id="L53">    }</span>
 
 
     public String toString() {

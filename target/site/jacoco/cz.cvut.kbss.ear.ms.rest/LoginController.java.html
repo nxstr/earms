@@ -20,14 +20,14 @@ import java.util.HashMap;
 @RestController
 @RequestMapping(&quot;/auth&quot;)
 public class LoginController {
-<span class="fc" id="L23">    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);</span>
+<span class="nc" id="L23">    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);</span>
 
     private final LoginService loginService;
 
     @Autowired
-<span class="fc" id="L28">    public LoginController(LoginService loginService) {</span>
-<span class="fc" id="L29">        this.loginService = loginService;</span>
-<span class="fc" id="L30">    }</span>
+<span class="nc" id="L28">    public LoginController(LoginService loginService) {</span>
+<span class="nc" id="L29">        this.loginService = loginService;</span>
+<span class="nc" id="L30">    }</span>
 
     @PostMapping(value = &quot;/login&quot;, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity&lt;String&gt; loginUser(@RequestBody HashMap&lt;String, String&gt; request){
