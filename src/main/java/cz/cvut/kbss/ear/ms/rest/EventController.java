@@ -1,5 +1,9 @@
 package cz.cvut.kbss.ear.ms.rest;
 
+import cz.cvut.kbss.ear.ms.dto.AccountDto;
+import cz.cvut.kbss.ear.ms.dto.EventDto;
+import cz.cvut.kbss.ear.ms.dto.PollOptionDto;
+import cz.cvut.kbss.ear.ms.dto.VoteDto;
 import cz.cvut.kbss.ear.ms.exceptions.DateValidationException;
 import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
 import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
@@ -18,8 +22,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/rest/event")
@@ -43,7 +49,7 @@ public class EventController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping(value = "/{id}")
-    public String getEvent(Principal principal, @PathVariable Integer id) {
+    public EventDto getEvent(Principal principal, @PathVariable Integer id) {
         try {
             Account user = getAccount(principal);
             Event event = eventService.find(id);
@@ -51,7 +57,7 @@ public class EventController {
                 eventService.makeAutoFinalPollOption(event);
             }
             if (user.getRole() == Role.ADMIN) {
-                return event.toString();
+                return prepareDto(event);
             }
             boolean isBelong = Objects.equals(user.getId(), event.getOwner().getId());
             if (!isBelong) {
@@ -62,50 +68,76 @@ public class EventController {
                     }
                 }
                 if (!isBelong) {
-                    return "This event does not belong to current user!";
+                    return new EventDto();
                 }
             }
-            return event.toString();
+            return prepareDto(event);
         }catch (NotFoundException e){
-            return e.getMessage();
+            return new EventDto();
         }
     }
 
 
+    private EventDto prepareDto(Event event){
+        List<AccountDto> guests = new ArrayList<>();
+        event.getGuests().stream().forEach(e-> guests.add(new AccountDto(e.getId(), e.getUsername(), null, e.getRole().toString())));
+        List<PollOptionDto> pollOptionDtoList = new ArrayList<>();
+
+        for(PollOption e: event.getOptions()){
+            List<VoteDto> voteDtoList = new ArrayList<>();
+            e.getVotes().stream().forEach(v -> voteDtoList.add(new VoteDto(v.getId(), v.getComment(), v.getVoteType().toString(), v.getGuest().getId(), e.getId())));
+            PollOptionDto p = new PollOptionDto(e.getId(), e.getDateSlot(), e.getTimeSlot(), e.getIsFinal(), event.getId(), voteDtoList);
+            pollOptionDtoList.add(p);
+        }
+
+        return new EventDto(event.getId(), event.getName(), event.getDetail(), event.getOpenDueTo(), event.getLocation(), event.getOwner().getId(),
+                guests, pollOptionDtoList);
+    }
+
+
     @PreAuthorize("hasAnyRole('ROLE_USER')")
-    @GetMapping(value = "/active")
-    public String getAllActive(Principal principal) {
+    @GetMapping(value = "/activeOwned")
+    public List<EventDto> getAllActiveOwned(Principal principal) {
         User user = getUser(principal);
-        String owned = "";
-        for(Event p:eventService.findAllActiveForOwner(user)){
-            owned += "        [id=" + p.getId() + ", name=" + p.getName() + ", open to=" + p.getOpenDueTo() + "]\n";
-        }
-        String guest = "";
-        for(Event p:eventService.findAllActiveGuestEvents(user)){
-            guest += "        [id=" + p.getId() + ", name=" + p.getName() + ", open to=" + p.getOpenDueTo() + ", owner=" + p.getOwner().getUsername() + "]\n";
-        }
-        return "Owner Active Events{" +
-                "\n    " + owned +
-                "}\n"+"Guest Active Events{" +
-                "\n    " + guest + "}\n";
+        List<Integer> activeOwned = eventService.findAllActiveForOwner(user).stream().map(Event::getId).collect(Collectors.toList());;
+        List<EventDto> events = new ArrayList<>();
+        activeOwned.forEach(e-> events.add(prepareDto(eventService.find(e))));
+        return events;
+    }
+
+
+    @GetMapping(value = "/allOwned")
+    public List<EventDto> getAllOwned(Principal principal) {
+        System.out.println( principal.getName());
+        User user = getUser(principal);
+        List<EventDto> events = new ArrayList<>();
+        user.getOwnedEvents().forEach(e-> events.add(prepareDto(e)));
+        System.out.println("here");
+        return events;
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @GetMapping(value = "/activeGuest")
+    public List<EventDto> getAllActiveGuest(Principal principal) {
+        User user = getUser(principal);
+        List<Integer> activeGuest = eventService.findAllActiveGuestEvents(user).stream().map(Event::getId).collect(Collectors.toList());;
+        List<EventDto> events = new ArrayList<>();
+        activeGuest.forEach(e-> events.add(prepareDto(eventService.find(e))));
+        return events;
     }
 
     @PreAuthorize("hasAnyRole('ROLE_USER')")
     @GetMapping(value = "/notVoted")
-    public String getAllNotVoted(Principal principal) {
+    public List<Integer> getAllNotVoted(Principal principal) {
         User user = getUser(principal);
-        String guest = "";
-        for(Event p:eventService.findAllNotVotedEvents(user)){
-            guest += "        [id=" + p.getId() + ", name=" + p.getName() + ", open to=" + p.getOpenDueTo() + ", owner=" + p.getOwner().getUsername() + "]\n";
-        }
-        return "Guest Not Voted Events{" +
-                "\n    " + guest + "}\n";
+        List<Integer> notVoted = eventService.findAllNotVotedEvents(user).stream().map(Event::getId).collect(Collectors.toList());;
+        return notVoted;
     }
 
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PostMapping(value = "/create")
-    public ResponseEntity<Event> createEvent(Principal principal, @RequestBody Event event) {
+    public ResponseEntity<Event> createEvent(Principal principal, @RequestBody EventDto event) {
             User user = getUser(principal);
             Event res = eventService.create(event.getName(), event.getDetail(), event.getLocation(), event.getOpenDueTo(), user);
 
@@ -114,10 +146,15 @@ public class EventController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
-    @PostMapping(value = "/{event_id}/update")
-    public ResponseEntity<String> updateEvent(Principal principal, @RequestBody Event event ,@PathVariable Integer event_id) {
+    @PutMapping(value = "/{event_id}/update")
+    public ResponseEntity<String> updateEvent(Principal principal, @RequestBody EventDto eventDto ,@PathVariable Integer event_id) {
         try {
             Account user = getAccount(principal);
+            Event event = eventService.find(event_id);
+            event.setName(eventDto.getName());
+            event.setDetail(eventDto.getDetail());
+            event.setLocation(eventDto.getLocation());
+            event.setOpenDueTo(eventDto.getOpenDueTo());
             if (user.getRole() == Role.ADMIN) {
                 Event event1 = eventService.update(event, event_id);
                 LOG.debug("Event {} successfully updated by admin.", event1.getId());
@@ -132,7 +169,7 @@ public class EventController {
                 return new ResponseEntity<>(event1.toString(), HttpStatus.OK);
             }
         }catch (NotFoundException e){
-            LOG.debug("User {} is trying to get unexisting event {}.", getAccount(principal).getId(), event.getId());
+            LOG.debug("User {} is trying to get unexisting event {}.", getAccount(principal).getId(), event_id);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
@@ -162,7 +199,7 @@ public class EventController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "/{id}/close")
+    @PutMapping(value = "/{id}/close")
     public ResponseEntity<String> closeEvent(Principal principal, @PathVariable Integer id) {
         try {
             User user = getUser(principal);
@@ -182,7 +219,7 @@ public class EventController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "/closeAll")
+    @PutMapping(value = "/closeAll")
     public ResponseEntity<String> closeAllEvents(Principal principal) {
             User user = getUser(principal);
             eventService.closeAll(user);
@@ -191,8 +228,8 @@ public class EventController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "/{id}/options")
-    public ResponseEntity<String> addPollOption(Principal principal, @PathVariable Integer id, @RequestBody List<PollOption> pollOptions) {
+    @PutMapping(value = "/{id}/options")
+    public ResponseEntity<String> addPollOption(Principal principal, @PathVariable Integer id, @RequestBody List<PollOptionDto> pollOptionsDto) {
         try {
             User user = getUser(principal);
             Event event = eventService.find(id);
@@ -200,8 +237,9 @@ public class EventController {
                 LOG.debug("Event {} does not belong to user {}.", event.getId(), user.getId());
                 return new ResponseEntity<>("This event does not belong to current user", HttpStatus.FORBIDDEN);
             }
-            for (PollOption p : pollOptions) {
-                eventService.addPollOption(event, p);
+            for (PollOptionDto p : pollOptionsDto) {
+                PollOption pl = new PollOption(p.getDateSlot(), p.getTimeSlot(), event);
+                eventService.addPollOption(event, pl);
             }
             LOG.debug("PollOption(s) successfully added to event{}.", event.getId());
             return new ResponseEntity<>(event.toString(), HttpStatus.OK);
@@ -245,7 +283,7 @@ public class EventController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "/{id}/guests/add/registered")
+    @PutMapping(value = "/{id}/guests/add/registered")
     public ResponseEntity<String> addGuestsByUsernames(Principal principal, @PathVariable Integer id, @RequestBody List<String> usernames) {
         try {
             User user = getUser(principal);
@@ -272,7 +310,7 @@ public class EventController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "/{id}/guests/add/notregistered")
+    @PutMapping(value = "/{id}/guests/add/notregistered")
     public ResponseEntity<String> addGuestsByEmails(Principal principal, @PathVariable Integer id, @RequestBody List<String> emails) {
         try {
             User user = getUser(principal);

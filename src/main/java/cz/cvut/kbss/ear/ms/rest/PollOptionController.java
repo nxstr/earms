@@ -1,10 +1,12 @@
 package cz.cvut.kbss.ear.ms.rest;
 
+import cz.cvut.kbss.ear.ms.dto.VoteDto;
 import cz.cvut.kbss.ear.ms.exceptions.DateValidationException;
 import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
 import cz.cvut.kbss.ear.ms.model.PollOption;
 import cz.cvut.kbss.ear.ms.model.User;
 import cz.cvut.kbss.ear.ms.model.Vote;
+import cz.cvut.kbss.ear.ms.model.VoteType;
 import cz.cvut.kbss.ear.ms.security.model.AuthenticationToken;
 import cz.cvut.kbss.ear.ms.service.PollOptionService;
 import cz.cvut.kbss.ear.ms.service.UserService;
@@ -60,8 +62,8 @@ public class PollOptionController {
     }
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "/options/{id}/votes/add")
-    public ResponseEntity<String> addVote(Principal principal, @PathVariable Integer id, @RequestBody Vote vote) {
+    @PutMapping(value = "/options/{id}/votes/add")
+    public ResponseEntity<String> addVote(Principal principal, @PathVariable Integer id, @RequestBody VoteDto voteDto) {
         try {
             User user = getUser(principal);
             PollOption pollOption = pollOptionService.find(id);
@@ -69,6 +71,9 @@ public class PollOptionController {
                 LOG.debug("Owner is trying to add vote to event {}.", pollOption.getEvent().getId());
                 return new ResponseEntity<>("Owner can not add or remove votes", HttpStatus.FORBIDDEN);
             }
+            Vote vote = new Vote(user, pollOptionService.find(voteDto.getPollOptionId()));
+            vote.setComment(voteDto.getComment());
+            vote.setVoteType(VoteType.valueOf(voteDto.getVoteType()));
             pollOptionService.addVote(pollOption, vote, user);
             LOG.debug("Votes(s) successfully added to pollOption{}.", pollOption.getId());
             return new ResponseEntity<>(pollOption.toString(), HttpStatus.OK);

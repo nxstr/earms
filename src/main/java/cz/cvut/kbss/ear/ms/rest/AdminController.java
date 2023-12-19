@@ -1,5 +1,7 @@
 package cz.cvut.kbss.ear.ms.rest;
 
+import cz.cvut.kbss.ear.ms.dto.AccountDto;
+import cz.cvut.kbss.ear.ms.dto.UserDto;
 import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
 import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
 import cz.cvut.kbss.ear.ms.model.Admin;
@@ -32,8 +34,9 @@ public class AdminController {
 
 
     @PostMapping(value = "/createAdmin")
-    public ResponseEntity<String> createAdmin(@RequestBody Admin admin) {
+    public ResponseEntity<String> createAdmin(@RequestBody AccountDto accountDto) {
         try {
+            Admin admin = new Admin(accountDto.getUsername(), accountDto.getPassword());
             Admin admin1 = adminService.persist(admin);
             LOG.debug("User {} successfully registered.", admin1.getUsername());
             return new ResponseEntity<>(admin1.toString(), HttpStatus.CREATED);
@@ -42,9 +45,10 @@ public class AdminController {
         }
     }
 
-    @PostMapping(value = "/updateAdmin/{id}")
-    public ResponseEntity<String> updateAdmin(@RequestBody Admin admin, @PathVariable Integer id) {
+    @PutMapping(value = "/updateAdmin/{id}")
+    public ResponseEntity<String> updateAdmin(@RequestBody AccountDto accountDto, @PathVariable Integer id) {
         try {
+            Admin admin = new Admin(accountDto.getUsername(), accountDto.getPassword());
             Admin admin1 = adminService.update(admin, id);
             LOG.debug("User {} successfully updated.", admin1.getUsername());
             return new ResponseEntity<>(admin1.toString(), HttpStatus.OK);
@@ -69,10 +73,15 @@ public class AdminController {
         }
     }
 
-    @PostMapping(value = "/updateUser/{id}")
-    public ResponseEntity<String> updateUser(@RequestBody User user, @PathVariable Integer id) {
+    @PutMapping(value = "/updateUser/{id}")
+    public ResponseEntity<String> updateUser(@RequestBody UserDto userDto, @PathVariable Integer id) {
         try {
-
+            User user = userService.find(id);
+            user.setUsername(userDto.getUsername());
+            user.setPassword(user.getPassword());
+            user.setFirstName(userDto.getFirstName());
+            user.setLastName(userDto.getLastName());
+            user.setEmail(userDto.getEmail());
             User user1 = userService.update(user, id);
             LOG.debug("User {} successfully updated.", user1.getUsername());
             return new ResponseEntity<>(user1.toString(), HttpStatus.OK);

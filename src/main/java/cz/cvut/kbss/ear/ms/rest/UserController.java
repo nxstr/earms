@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ear.ms.rest;
 
+import cz.cvut.kbss.ear.ms.dto.UserDto;
 import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
 import cz.cvut.kbss.ear.ms.model.User;
 import cz.cvut.kbss.ear.ms.security.model.AuthenticationToken;
@@ -30,12 +31,13 @@ public class UserController {
     /**
      * Registers a new user.
      *
-     * @param user User data
+     * @param userDto UserDto data
      */
     @PreAuthorize("anonymous || hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
+    public ResponseEntity<String> register(@RequestBody UserDto userDto) {
         try {
+            User user = new User(userDto.getUsername(), userDto.getPassword(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName());
             User user1 = userService.persist(user);
             LOG.debug("User {} successfully registered.", user1.getUsername());
             return new ResponseEntity<>(user1.toString(), HttpStatus.CREATED);
@@ -46,9 +48,9 @@ public class UserController {
 
 
     @PreAuthorize("hasRole('ROLE_USER')")
-    @PostMapping(value = "/change/{email}")
+    @PutMapping(value = "/changeEmail")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<String> changeCurrentUserEmail(Principal principal, @PathVariable String email){
+    public ResponseEntity<String> changeCurrentUserEmail(Principal principal, @RequestBody String email){
         try {
             final AuthenticationToken auth = (AuthenticationToken) principal;
             Integer id = auth.getPrincipal().getAccount().getId();
@@ -62,12 +64,18 @@ public class UserController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') || hasRole('ROLE_USER')")
-    @PostMapping(value = "/update")
+    @PutMapping(value = "/update")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<String> update(Principal principal, @RequestBody User user){
+    public ResponseEntity<String> update(Principal principal, @RequestBody UserDto userDto){
         try {
             final AuthenticationToken auth = (AuthenticationToken) principal;
             Integer id = auth.getPrincipal().getAccount().getId();
+            User user = userService.find(id);
+            user.setUsername(userDto.getUsername());
+            user.setPassword(user.getPassword());
+            user.setFirstName(userDto.getFirstName());
+            user.setLastName(userDto.getLastName());
+            user.setEmail(userDto.getEmail());
             User user1 = userService.update(user, id);
             LOG.debug("User {} changed data.", user1.getId());
             return new ResponseEntity<>(user1.toString(), HttpStatus.OK);

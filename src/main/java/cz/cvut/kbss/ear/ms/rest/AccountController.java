@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ear.ms.rest;
 
+import cz.cvut.kbss.ear.ms.dto.AccountDto;
 import cz.cvut.kbss.ear.ms.model.Account;
 import cz.cvut.kbss.ear.ms.model.Admin;
 import cz.cvut.kbss.ear.ms.model.User;
@@ -34,32 +35,32 @@ public class AccountController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     @GetMapping(value = "/current")
-    public String getCurrent(Principal principal) {
+    public AccountDto getCurrent(Principal principal) {
         final AuthenticationToken auth = (AuthenticationToken) principal;
         Integer id = auth.getPrincipal().getAccount().getId();
         Account acc = userService.findById(id);
         if(acc==null){
             acc = adminService.findById(id);
         }
-        return acc.toString();
+        return new AccountDto(acc.getId(), acc.getUsername(), null, acc.getRole().toString());
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping(value = "/admin/get/{id}")
-    public String getAccount(@PathVariable Integer id) {
+    public AccountDto getAccount(@PathVariable Integer id) {
         Account acc = userService.findById(id);
         if(acc==null){
             acc = adminService.findById(id);
             if(acc==null){
-                return "Username with id " + id + " does not exist";
+                return new AccountDto(null, null, null, null);
             }
         }
-        return acc.toString();
+        return new AccountDto(acc.getId(), acc.getUsername(), null, acc.getRole().toString());
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') || hasRole('ROLE_USER')")
-    @PostMapping(value = "/{username}")
-    public ResponseEntity<String> changeCurrentUserUsername(Principal principal, @PathVariable String username){
+    @PutMapping(value = "/changeUname")
+    public ResponseEntity<String> changeCurrentUserUsername(Principal principal, @RequestBody String username){
             final AuthenticationToken auth = (AuthenticationToken) principal;
             Integer id = auth.getPrincipal().getAccount().getId();
             User user = userService.findById(id);
