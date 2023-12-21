@@ -108,11 +108,17 @@ public class EventController {
 
     @GetMapping(value = "/allOwned")
     public List<EventDto> getAllOwned(Principal principal) {
-        System.out.println( principal.getName());
         User user = getUser(principal);
         List<EventDto> events = new ArrayList<>();
         user.getOwnedEvents().forEach(e-> events.add(prepareDto(e)));
-        System.out.println("here");
+        return events;
+    }
+
+    @GetMapping(value = "/allGuest")
+    public List<EventDto> getAllGuest(Principal principal) {
+        User user = getUser(principal);
+        List<EventDto> events = new ArrayList<>();
+        user.getGuestEvents().forEach(e-> events.add(prepareDto(e)));
         return events;
     }
 
