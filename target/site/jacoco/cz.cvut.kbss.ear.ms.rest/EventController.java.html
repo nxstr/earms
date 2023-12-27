@@ -363,20 +363,42 @@ public class EventController {
         }
     }
 
+    @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+    @DeleteMapping(value = &quot;/{event_id}/guests/leave&quot;)
+    public ResponseEntity&lt;String&gt; leaveEvent(Principal principal, @PathVariable Integer event_id) {
+        try {
+<span class="nc" id="L370">            User user = getUser(principal);</span>
+<span class="nc" id="L371">            Event event = eventService.find(event_id);</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">            if (event.getGuests().stream().noneMatch(g -&gt; Objects.equals(g.getId(), user.getId()))) {</span>
+<span class="nc" id="L373">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L374">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+            }
+<span class="nc" id="L376">            eventService.removeGuest(event, user);</span>
+<span class="nc" id="L377">            LOG.debug(&quot;User {} successfully removed from event {}.&quot;, user.getId(), event.getId());</span>
+<span class="nc" id="L378">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L379">        }catch (NotFoundException e){</span>
+<span class="nc" id="L380">            LOG.debug(&quot;User is trying to remove guest with id {} from event {}&quot;, getAccount(principal).getId(), event_id);</span>
+<span class="nc" id="L381">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L382">        }catch (DateValidationException d){</span>
+<span class="nc" id="L383">            LOG.debug(&quot;User is trying to add guest to closed event {}&quot;, getAccount(principal).getId());</span>
+<span class="nc" id="L384">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
+        }
+    }
+
     private User getUser(Principal principal){
-<span class="nc" id="L367">        final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L368">        Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L369">        return userService.find(id);</span>
+<span class="nc" id="L389">        final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L390">        Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L391">        return userService.find(id);</span>
     }
 
     private Account getAccount(Principal principal){
-<span class="nc" id="L373">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L374">            Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L375">            Account acc = userService.findById(id);</span>
-<span class="nc bnc" id="L376" title="All 2 branches missed.">            if(acc==null){</span>
-<span class="nc" id="L377">                acc = adminService.findById(id);</span>
+<span class="nc" id="L395">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L396">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L397">            Account acc = userService.findById(id);</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">            if(acc==null){</span>
+<span class="nc" id="L399">                acc = adminService.findById(id);</span>
             }
-<span class="nc" id="L379">            return acc;</span>
+<span class="nc" id="L401">            return acc;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

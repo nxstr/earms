@@ -2,6 +2,7 @@ package cz.cvut.kbss.ear.ms.rest;
 
 import cz.cvut.kbss.ear.ms.dto.UserDto;
 import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
+import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
 import cz.cvut.kbss.ear.ms.model.User;
 import cz.cvut.kbss.ear.ms.security.model.AuthenticationToken;
 import cz.cvut.kbss.ear.ms.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/rest/users")
@@ -81,6 +83,17 @@ public class UserController {
             return new ResponseEntity<>(user1.toString(), HttpStatus.OK);
         }catch (ExistsException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value = "/get/{id}")
+    public UserDto getUser(@PathVariable Integer id){
+        try {
+            User user = userService.findById(id);
+            System.out.println(user.getUsername());
+            return new UserDto(id, user.getUsername(), "", user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        }catch (NotFoundException e){
+            return null;
         }
     }
 }

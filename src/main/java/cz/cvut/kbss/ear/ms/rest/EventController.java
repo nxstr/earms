@@ -363,6 +363,28 @@ public class EventController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @DeleteMapping(value = "/{event_id}/guests/leave")
+    public ResponseEntity<String> leaveEvent(Principal principal, @PathVariable Integer event_id) {
+        try {
+            User user = getUser(principal);
+            Event event = eventService.find(event_id);
+            if (event.getGuests().stream().noneMatch(g -> Objects.equals(g.getId(), user.getId()))) {
+                LOG.debug("Event {} does not belong to user {}.", event.getId(), user.getId());
+                return new ResponseEntity<>("This event does not belong to current user", HttpStatus.FORBIDDEN);
+            }
+            eventService.removeGuest(event, user);
+            LOG.debug("User {} successfully removed from event {}.", user.getId(), event.getId());
+            return new ResponseEntity<>(event.toString(), HttpStatus.OK);
+        }catch (NotFoundException e){
+            LOG.debug("User is trying to remove guest with id {} from event {}", getAccount(principal).getId(), event_id);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }catch (DateValidationException d){
+            LOG.debug("User is trying to add guest to closed event {}", getAccount(principal).getId());
+            return new ResponseEntity<>(d.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
     private User getUser(Principal principal){
         final AuthenticationToken auth = (AuthenticationToken) principal;
         Integer id = auth.getPrincipal().getAccount().getId();

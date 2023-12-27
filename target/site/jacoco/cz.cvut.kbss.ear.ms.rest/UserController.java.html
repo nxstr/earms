@@ -2,6 +2,7 @@
 
 import cz.cvut.kbss.ear.ms.dto.UserDto;
 import cz.cvut.kbss.ear.ms.exceptions.ExistsException;
+import cz.cvut.kbss.ear.ms.exceptions.NotFoundException;
 import cz.cvut.kbss.ear.ms.model.User;
 import cz.cvut.kbss.ear.ms.security.model.AuthenticationToken;
 import cz.cvut.kbss.ear.ms.service.UserService;
@@ -14,19 +15,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping(&quot;/rest/users&quot;)
 public class UserController {
 
-<span class="nc" id="L22">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
+<span class="nc" id="L24">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
 
     private final UserService userService;
 
     @Autowired
-<span class="nc" id="L27">    public UserController(UserService userService) {</span>
-<span class="nc" id="L28">        this.userService = userService;</span>
-<span class="nc" id="L29">    }</span>
+<span class="nc" id="L29">    public UserController(UserService userService) {</span>
+<span class="nc" id="L30">        this.userService = userService;</span>
+<span class="nc" id="L31">    }</span>
 
     /**
      * Registers a new user.
@@ -37,12 +39,12 @@ public class UserController {
     @RequestMapping(value = &quot;/register&quot;)
     public ResponseEntity&lt;String&gt; register(@RequestBody UserDto userDto) {
         try {
-<span class="nc" id="L40">            User user = new User(userDto.getUsername(), userDto.getPassword(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName());</span>
-<span class="nc" id="L41">            User user1 = userService.persist(user);</span>
-<span class="nc" id="L42">            LOG.debug(&quot;User {} successfully registered.&quot;, user1.getUsername());</span>
-<span class="nc" id="L43">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.CREATED);</span>
-<span class="nc" id="L44">        }catch (ExistsException e){</span>
-<span class="nc" id="L45">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L42">            User user = new User(userDto.getUsername(), userDto.getPassword(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName());</span>
+<span class="nc" id="L43">            User user1 = userService.persist(user);</span>
+<span class="nc" id="L44">            LOG.debug(&quot;User {} successfully registered.&quot;, user1.getUsername());</span>
+<span class="nc" id="L45">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.CREATED);</span>
+<span class="nc" id="L46">        }catch (ExistsException e){</span>
+<span class="nc" id="L47">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
         }
     }
 
@@ -52,14 +54,14 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity&lt;String&gt; changeCurrentUserEmail(Principal principal, @RequestBody String email){
         try {
-<span class="nc" id="L55">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L56">            Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L57">            User user = userService.find(id);</span>
-<span class="nc" id="L58">            userService.changeCurrentUserEmail(user, email);</span>
-<span class="nc" id="L59">            LOG.debug(&quot;User {} changed email {}.&quot;, user.getUsername(), email);</span>
-<span class="nc" id="L60">            return new ResponseEntity&lt;&gt;(user.toString(), HttpStatus.NO_CONTENT);</span>
-<span class="nc" id="L61">        }catch (ExistsException e){</span>
-<span class="nc" id="L62">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L57">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L58">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L59">            User user = userService.find(id);</span>
+<span class="nc" id="L60">            userService.changeCurrentUserEmail(user, email);</span>
+<span class="nc" id="L61">            LOG.debug(&quot;User {} changed email {}.&quot;, user.getUsername(), email);</span>
+<span class="nc" id="L62">            return new ResponseEntity&lt;&gt;(user.toString(), HttpStatus.NO_CONTENT);</span>
+<span class="nc" id="L63">        }catch (ExistsException e){</span>
+<span class="nc" id="L64">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
         }
     }
 
@@ -68,19 +70,30 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity&lt;String&gt; update(Principal principal, @RequestBody UserDto userDto){
         try {
-<span class="nc" id="L71">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L72">            Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L73">            User user = userService.find(id);</span>
-<span class="nc" id="L74">            user.setUsername(userDto.getUsername());</span>
-<span class="nc" id="L75">            user.setPassword(user.getPassword());</span>
-<span class="nc" id="L76">            user.setFirstName(userDto.getFirstName());</span>
-<span class="nc" id="L77">            user.setLastName(userDto.getLastName());</span>
-<span class="nc" id="L78">            user.setEmail(userDto.getEmail());</span>
-<span class="nc" id="L79">            User user1 = userService.update(user, id);</span>
-<span class="nc" id="L80">            LOG.debug(&quot;User {} changed data.&quot;, user1.getId());</span>
-<span class="nc" id="L81">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L82">        }catch (ExistsException e){</span>
-<span class="nc" id="L83">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L73">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L74">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L75">            User user = userService.find(id);</span>
+<span class="nc" id="L76">            user.setUsername(userDto.getUsername());</span>
+<span class="nc" id="L77">            user.setPassword(user.getPassword());</span>
+<span class="nc" id="L78">            user.setFirstName(userDto.getFirstName());</span>
+<span class="nc" id="L79">            user.setLastName(userDto.getLastName());</span>
+<span class="nc" id="L80">            user.setEmail(userDto.getEmail());</span>
+<span class="nc" id="L81">            User user1 = userService.update(user, id);</span>
+<span class="nc" id="L82">            LOG.debug(&quot;User {} changed data.&quot;, user1.getId());</span>
+<span class="nc" id="L83">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L84">        }catch (ExistsException e){</span>
+<span class="nc" id="L85">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+        }
+    }
+
+    @GetMapping(value = &quot;/get/{id}&quot;)
+    public UserDto getUser(@PathVariable Integer id){
+        try {
+<span class="nc" id="L92">            User user = userService.findById(id);</span>
+<span class="nc" id="L93">            System.out.println(user.getUsername());</span>
+<span class="nc" id="L94">            return new UserDto(id, user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L95">        }catch (NotFoundException e){</span>
+<span class="nc" id="L96">            return null;</span>
         }
     }
 }

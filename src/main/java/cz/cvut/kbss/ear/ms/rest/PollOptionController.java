@@ -19,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -63,7 +64,7 @@ public class PollOptionController {
 
     @PreAuthorize("hasRole('ROLE_USER')")
     @PutMapping(value = "/options/{id}/votes/add")
-    public ResponseEntity<String> addVote(Principal principal, @PathVariable Integer id, @RequestBody VoteDto voteDto) {
+    public ResponseEntity<String> addVote(Principal principal, @PathVariable Integer id, @RequestBody List<VoteDto> voteDto) {
         try {
             User user = getUser(principal);
             PollOption pollOption = pollOptionService.find(id);
@@ -71,10 +72,12 @@ public class PollOptionController {
                 LOG.debug("Owner is trying to add vote to event {}.", pollOption.getEvent().getId());
                 return new ResponseEntity<>("Owner can not add or remove votes", HttpStatus.FORBIDDEN);
             }
-            Vote vote = new Vote(user, pollOptionService.find(voteDto.getPollOptionId()));
-            vote.setComment(voteDto.getComment());
-            vote.setVoteType(VoteType.valueOf(voteDto.getVoteType()));
-            pollOptionService.addVote(pollOption, vote, user);
+            for(VoteDto v: voteDto) {
+                Vote vote = new Vote(user, pollOptionService.find(id));
+                vote.setComment(v.getComment());
+                vote.setVoteType(VoteType.valueOf(v.getVoteType()));
+                pollOptionService.addVote(pollOption, vote, user);
+            }
             LOG.debug("Votes(s) successfully added to pollOption{}.", pollOption.getId());
             return new ResponseEntity<>(pollOption.toString(), HttpStatus.OK);
         }catch (NotFoundException e){
