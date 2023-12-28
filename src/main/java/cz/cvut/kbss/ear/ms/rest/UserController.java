@@ -76,7 +76,7 @@ public class UserController {
             User user = userService.find(id);
             user.setUsername(userDto.getUsername());
             if(!Objects.equals(userDto.getPassword(), "") && !Objects.equals(userDto.getPassword(), null)) {
-                user.setPassword(user.getPassword());
+                user.setPassword(userDto.getPassword());
             }
             user.setFirstName(userDto.getFirstName());
             user.setLastName(userDto.getLastName());

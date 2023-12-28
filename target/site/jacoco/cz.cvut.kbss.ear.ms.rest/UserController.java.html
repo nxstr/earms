@@ -76,7 +76,7 @@ public class UserController {
 <span class="nc" id="L76">            User user = userService.find(id);</span>
 <span class="nc" id="L77">            user.setUsername(userDto.getUsername());</span>
 <span class="nc bnc" id="L78" title="All 4 branches missed.">            if(!Objects.equals(userDto.getPassword(), &quot;&quot;) &amp;&amp; !Objects.equals(userDto.getPassword(), null)) {</span>
-<span class="nc" id="L79">                user.setPassword(user.getPassword());</span>
+<span class="nc" id="L79">                user.setPassword(userDto.getPassword());</span>
             }
 <span class="nc" id="L81">            user.setFirstName(userDto.getFirstName());</span>
 <span class="nc" id="L82">            user.setLastName(userDto.getLastName());</span>
