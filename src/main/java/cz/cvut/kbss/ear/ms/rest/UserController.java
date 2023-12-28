@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/rest/users")
@@ -74,7 +75,9 @@ public class UserController {
             Integer id = auth.getPrincipal().getAccount().getId();
             User user = userService.find(id);
             user.setUsername(userDto.getUsername());
-            user.setPassword(user.getPassword());
+            if(!Objects.equals(userDto.getPassword(), "") && !Objects.equals(userDto.getPassword(), null)) {
+                user.setPassword(user.getPassword());
+            }
             user.setFirstName(userDto.getFirstName());
             user.setLastName(userDto.getLastName());
             user.setEmail(userDto.getEmail());
