@@ -8,7 +8,7 @@ ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.rest,PollOptionController,27
 ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.rest,AdminController,220,0,0,0,48,0,7,0,7,0
 ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.rest,DefaultPageController,2,3,0,0,1,1,1,1,1,1
 ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.rest,EventController,1263,0,48,0,219,0,53,0,29,0
-ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.rest,UserController,184,0,0,0,36,0,6,0,6,0
+ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.rest,UserController,213,0,0,0,39,0,7,0,7,0
 ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.rest,LoginController,79,0,0,0,16,0,3,0,3,0
 ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms,MeetingSchedulerApplication,5,3,0,0,2,1,1,1,1,1
 ear-semestral-meeting-scheduler,cz.cvut.kbss.ear.ms.security.model,AccountDetails,79,0,0,0,26,0,12,0,12,0

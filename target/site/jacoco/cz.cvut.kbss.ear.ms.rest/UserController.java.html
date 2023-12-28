@@ -90,10 +90,19 @@ public class UserController {
     public UserDto getUser(@PathVariable Integer id){
         try {
 <span class="nc" id="L92">            User user = userService.findById(id);</span>
-<span class="nc" id="L93">            System.out.println(user.getUsername());</span>
-<span class="nc" id="L94">            return new UserDto(id, user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
-<span class="nc" id="L95">        }catch (NotFoundException e){</span>
-<span class="nc" id="L96">            return null;</span>
+<span class="nc" id="L93">            return new UserDto(id, user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L94">        }catch (NotFoundException e){</span>
+<span class="nc" id="L95">            return null;</span>
+        }
+    }
+
+    @GetMapping(value = &quot;/getByName/{username}&quot;)
+    public UserDto getUserByUsername(@PathVariable String username){
+        try {
+<span class="nc" id="L102">            User user = userService.findByUsername(username);</span>
+<span class="nc" id="L103">            return new UserDto(user.getId(), user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L104">        }catch (NotFoundException e){</span>
+<span class="nc" id="L105">            return null;</span>
         }
     }
 }

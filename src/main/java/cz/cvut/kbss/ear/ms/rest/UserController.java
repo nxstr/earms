@@ -90,8 +90,17 @@ public class UserController {
     public UserDto getUser(@PathVariable Integer id){
         try {
             User user = userService.findById(id);
-            System.out.println(user.getUsername());
             return new UserDto(id, user.getUsername(), "", user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+        }catch (NotFoundException e){
+            return null;
+        }
+    }
+
+    @GetMapping(value = "/getByName/{username}")
+    public UserDto getUserByUsername(@PathVariable String username){
+        try {
+            User user = userService.findByUsername(username);
+            return new UserDto(user.getId(), user.getUsername(), "", user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
         }catch (NotFoundException e){
             return null;
         }
