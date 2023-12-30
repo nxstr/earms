@@ -41,6 +41,12 @@ public class UserController {
     public ResponseEntity<String> register(@RequestBody UserDto userDto) {
         try {
             User user = new User(userDto.getUsername(), userDto.getPassword(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName());
+            if(userService.existsUsername(user.getUsername())){
+                return new ResponseEntity<>("Username is already exists", HttpStatus.BAD_REQUEST);
+            }
+            if(userService.existsEmail(user.getEmail())){
+                return new ResponseEntity<>("Email is already exists", HttpStatus.CONFLICT);
+            }
             User user1 = userService.persist(user);
             LOG.debug("User {} successfully registered.", user1.getUsername());
             return new ResponseEntity<>(user1.toString(), HttpStatus.CREATED);

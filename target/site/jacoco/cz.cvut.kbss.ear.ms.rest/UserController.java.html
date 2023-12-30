@@ -41,11 +41,17 @@ public class UserController {
     public ResponseEntity&lt;String&gt; register(@RequestBody UserDto userDto) {
         try {
 <span class="nc" id="L43">            User user = new User(userDto.getUsername(), userDto.getPassword(), userDto.getEmail(), userDto.getFirstName(), userDto.getLastName());</span>
-<span class="nc" id="L44">            User user1 = userService.persist(user);</span>
-<span class="nc" id="L45">            LOG.debug(&quot;User {} successfully registered.&quot;, user1.getUsername());</span>
-<span class="nc" id="L46">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.CREATED);</span>
-<span class="nc" id="L47">        }catch (ExistsException e){</span>
-<span class="nc" id="L48">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            if(userService.existsUsername(user.getUsername())){</span>
+<span class="nc" id="L45">                return new ResponseEntity&lt;&gt;(&quot;Username is already exists&quot;, HttpStatus.BAD_REQUEST);</span>
+            }
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if(userService.existsEmail(user.getEmail())){</span>
+<span class="nc" id="L48">                return new ResponseEntity&lt;&gt;(&quot;Email is already exists&quot;, HttpStatus.CONFLICT);</span>
+            }
+<span class="nc" id="L50">            User user1 = userService.persist(user);</span>
+<span class="nc" id="L51">            LOG.debug(&quot;User {} successfully registered.&quot;, user1.getUsername());</span>
+<span class="nc" id="L52">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.CREATED);</span>
+<span class="nc" id="L53">        }catch (ExistsException e){</span>
+<span class="nc" id="L54">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
         }
     }
 
@@ -55,14 +61,14 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity&lt;String&gt; changeCurrentUserEmail(Principal principal, @RequestBody String email){
         try {
-<span class="nc" id="L58">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L59">            Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L60">            User user = userService.find(id);</span>
-<span class="nc" id="L61">            userService.changeCurrentUserEmail(user, email);</span>
-<span class="nc" id="L62">            LOG.debug(&quot;User {} changed email {}.&quot;, user.getUsername(), email);</span>
-<span class="nc" id="L63">            return new ResponseEntity&lt;&gt;(user.toString(), HttpStatus.NO_CONTENT);</span>
-<span class="nc" id="L64">        }catch (ExistsException e){</span>
-<span class="nc" id="L65">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L64">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L65">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L66">            User user = userService.find(id);</span>
+<span class="nc" id="L67">            userService.changeCurrentUserEmail(user, email);</span>
+<span class="nc" id="L68">            LOG.debug(&quot;User {} changed email {}.&quot;, user.getUsername(), email);</span>
+<span class="nc" id="L69">            return new ResponseEntity&lt;&gt;(user.toString(), HttpStatus.NO_CONTENT);</span>
+<span class="nc" id="L70">        }catch (ExistsException e){</span>
+<span class="nc" id="L71">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
         }
     }
 
@@ -71,41 +77,41 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity&lt;String&gt; update(Principal principal, @RequestBody UserDto userDto){
         try {
-<span class="nc" id="L74">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L75">            Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L76">            User user = userService.find(id);</span>
-<span class="nc" id="L77">            user.setUsername(userDto.getUsername());</span>
-<span class="nc bnc" id="L78" title="All 4 branches missed.">            if(!Objects.equals(userDto.getPassword(), &quot;&quot;) &amp;&amp; !Objects.equals(userDto.getPassword(), null)) {</span>
-<span class="nc" id="L79">                user.setPassword(userDto.getPassword());</span>
+<span class="nc" id="L80">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L81">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L82">            User user = userService.find(id);</span>
+<span class="nc" id="L83">            user.setUsername(userDto.getUsername());</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">            if(!Objects.equals(userDto.getPassword(), &quot;&quot;) &amp;&amp; !Objects.equals(userDto.getPassword(), null)) {</span>
+<span class="nc" id="L85">                user.setPassword(userDto.getPassword());</span>
             }
-<span class="nc" id="L81">            user.setFirstName(userDto.getFirstName());</span>
-<span class="nc" id="L82">            user.setLastName(userDto.getLastName());</span>
-<span class="nc" id="L83">            user.setEmail(userDto.getEmail());</span>
-<span class="nc" id="L84">            User user1 = userService.update(user, id);</span>
-<span class="nc" id="L85">            LOG.debug(&quot;User {} changed data.&quot;, user1.getId());</span>
-<span class="nc" id="L86">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L87">        }catch (ExistsException e){</span>
-<span class="nc" id="L88">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L87">            user.setFirstName(userDto.getFirstName());</span>
+<span class="nc" id="L88">            user.setLastName(userDto.getLastName());</span>
+<span class="nc" id="L89">            user.setEmail(userDto.getEmail());</span>
+<span class="nc" id="L90">            User user1 = userService.update(user, id);</span>
+<span class="nc" id="L91">            LOG.debug(&quot;User {} changed data.&quot;, user1.getId());</span>
+<span class="nc" id="L92">            return new ResponseEntity&lt;&gt;(user1.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L93">        }catch (ExistsException e){</span>
+<span class="nc" id="L94">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
         }
     }
 
     @GetMapping(value = &quot;/get/{id}&quot;)
     public UserDto getUser(@PathVariable Integer id){
         try {
-<span class="nc" id="L95">            User user = userService.findById(id);</span>
-<span class="nc" id="L96">            return new UserDto(id, user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
-<span class="nc" id="L97">        }catch (NotFoundException e){</span>
-<span class="nc" id="L98">            return null;</span>
+<span class="nc" id="L101">            User user = userService.findById(id);</span>
+<span class="nc" id="L102">            return new UserDto(id, user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L103">        }catch (NotFoundException e){</span>
+<span class="nc" id="L104">            return null;</span>
         }
     }
 
     @GetMapping(value = &quot;/getByName/{username}&quot;)
     public UserDto getUserByUsername(@PathVariable String username){
         try {
-<span class="nc" id="L105">            User user = userService.findByUsername(username);</span>
-<span class="nc" id="L106">            return new UserDto(user.getId(), user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
-<span class="nc" id="L107">        }catch (NotFoundException e){</span>
-<span class="nc" id="L108">            return null;</span>
+<span class="nc" id="L111">            User user = userService.findByUsername(username);</span>
+<span class="nc" id="L112">            return new UserDto(user.getId(), user.getUsername(), &quot;&quot;, user.getFirstName(), user.getLastName(), user.getEmail(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;(), new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L113">        }catch (NotFoundException e){</span>
+<span class="nc" id="L114">            return null;</span>
         }
     }
 }

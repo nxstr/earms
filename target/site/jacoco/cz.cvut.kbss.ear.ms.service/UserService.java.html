@@ -20,11 +20,11 @@ public class UserService extends AccountService&lt;User&gt;{
 
     @Autowired
     public UserService(UserDao dao, PasswordEncoder passwordEncoder, PasswordEncoder passwordEncoder1, EventDao eventDao) {
-<span class="fc" id="L23">        super(passwordEncoder, dao);</span>
-<span class="fc" id="L24">        this.dao = dao;</span>
-<span class="fc" id="L25">        this.passwordEncoder = passwordEncoder1;</span>
-<span class="fc" id="L26">        this.eventDao = eventDao;</span>
-<span class="fc" id="L27">    }</span>
+<span class="nc" id="L23">        super(passwordEncoder, dao);</span>
+<span class="nc" id="L24">        this.dao = dao;</span>
+<span class="nc" id="L25">        this.passwordEncoder = passwordEncoder1;</span>
+<span class="nc" id="L26">        this.eventDao = eventDao;</span>
+<span class="nc" id="L27">    }</span>
 
     @Transactional(readOnly = true)
     public User find(Integer id){
@@ -85,11 +85,11 @@ public class UserService extends AccountService&lt;User&gt;{
 <span class="nc" id="L85">        dao.remove(user);</span>
 <span class="nc" id="L86">    }</span>
 
-    private boolean existsUsername(String username){
+    public boolean existsUsername(String username){
 <span class="nc bnc" id="L89" title="All 2 branches missed.">        return dao.findByUsername(username) != null;</span>
     }
 
-    private boolean existsEmail(String email){
+    public boolean existsEmail(String email){
 <span class="nc bnc" id="L93" title="All 2 branches missed.">        return dao.findByEmail(email) != null;</span>
     }
 

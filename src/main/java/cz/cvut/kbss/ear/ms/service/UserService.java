@@ -85,11 +85,11 @@ public class UserService extends AccountService<User>{
         dao.remove(user);
     }
 
-    private boolean existsUsername(String username){
+    public boolean existsUsername(String username){
         return dao.findByUsername(username) != null;
     }
 
-    private boolean existsEmail(String email){
+    public boolean existsEmail(String email){
         return dao.findByEmail(email) != null;
     }
 
