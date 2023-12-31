@@ -13,6 +13,7 @@ import cz.cvut.kbss.ear.ms.service.AdminService;
 import cz.cvut.kbss.ear.ms.service.EventService;
 import cz.cvut.kbss.ear.ms.service.PollOptionService;
 import cz.cvut.kbss.ear.ms.service.UserService;
+import org.apache.tomcat.jni.Poll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -351,6 +352,16 @@ public class EventController {
                 return new ResponseEntity<>("This event does not belong to current user", HttpStatus.FORBIDDEN);
             }
             User guest = userService.find(id);
+
+            for(PollOption p: event.getOptions()){
+                List<Vote> votesToRemove = new ArrayList<>();
+                for(Vote v: p.getVotes()){
+                    if(Objects.equals(v.getGuest().getId(), id)){
+                        votesToRemove.add(v);
+                    }
+                }
+                p.getVotes().removeAll(votesToRemove);
+            }
             eventService.removeGuest(event, guest);
             LOG.debug("User {} successfully removed from event {}.", user.getId(), event.getId());
             return new ResponseEntity<>(event.toString(), HttpStatus.OK);
@@ -372,6 +383,15 @@ public class EventController {
             if (event.getGuests().stream().noneMatch(g -> Objects.equals(g.getId(), user.getId()))) {
                 LOG.debug("Event {} does not belong to user {}.", event.getId(), user.getId());
                 return new ResponseEntity<>("This event does not belong to current user", HttpStatus.FORBIDDEN);
+            }
+            for(PollOption p: event.getOptions()){
+                List<Vote> votesToRemove = new ArrayList<>();
+                for(Vote v: p.getVotes()){
+                    if(Objects.equals(v.getGuest().getId(), user.getId())){
+                        votesToRemove.add(v);
+                    }
+                }
+                p.getVotes().removeAll(votesToRemove);
             }
             eventService.removeGuest(event, user);
             LOG.debug("User {} successfully removed from event {}.", user.getId(), event.getId());

@@ -13,6 +13,7 @@ import cz.cvut.kbss.ear.ms.service.AdminService;
 import cz.cvut.kbss.ear.ms.service.EventService;
 import cz.cvut.kbss.ear.ms.service.PollOptionService;
 import cz.cvut.kbss.ear.ms.service.UserService;
+import org.apache.tomcat.jni.Poll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 @RequestMapping(&quot;/rest/event&quot;)
 public class EventController {
 
-<span class="nc" id="L34">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
+<span class="nc" id="L35">    private static final Logger LOG = LoggerFactory.getLogger(UserController.class);</span>
 
     private final EventService eventService;
     private final UserService userService;
@@ -39,58 +40,58 @@ public class EventController {
     private final PollOptionService pollOptionService;
 
     @Autowired
-<span class="nc" id="L42">    public EventController(EventService eventService, UserService userService, AdminService adminService, PollOptionService pollOptionService) {</span>
-<span class="nc" id="L43">        this.eventService = eventService;</span>
-<span class="nc" id="L44">        this.userService = userService;</span>
-<span class="nc" id="L45">        this.adminService = adminService;</span>
-<span class="nc" id="L46">        this.pollOptionService = pollOptionService;</span>
-<span class="nc" id="L47">    }</span>
+<span class="nc" id="L43">    public EventController(EventService eventService, UserService userService, AdminService adminService, PollOptionService pollOptionService) {</span>
+<span class="nc" id="L44">        this.eventService = eventService;</span>
+<span class="nc" id="L45">        this.userService = userService;</span>
+<span class="nc" id="L46">        this.adminService = adminService;</span>
+<span class="nc" id="L47">        this.pollOptionService = pollOptionService;</span>
+<span class="nc" id="L48">    }</span>
 
 
     @PreAuthorize(&quot;hasAnyRole('ROLE_ADMIN', 'ROLE_USER')&quot;)
     @GetMapping(value = &quot;/{id}&quot;)
     public EventDto getEvent(Principal principal, @PathVariable Integer id) {
         try {
-<span class="nc" id="L54">            Account user = getAccount(principal);</span>
-<span class="nc" id="L55">            Event event = eventService.find(id);</span>
-<span class="nc bnc" id="L56" title="All 4 branches missed.">            if (eventService.isClosed(event) &amp;&amp; pollOptionService.findFinalForEvent(event) == null) {</span>
-<span class="nc" id="L57">                eventService.makeAutoFinalPollOption(event);</span>
+<span class="nc" id="L55">            Account user = getAccount(principal);</span>
+<span class="nc" id="L56">            Event event = eventService.find(id);</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">            if (eventService.isClosed(event) &amp;&amp; pollOptionService.findFinalForEvent(event) == null) {</span>
+<span class="nc" id="L58">                eventService.makeAutoFinalPollOption(event);</span>
             }
-<span class="nc bnc" id="L59" title="All 2 branches missed.">            if (user.getRole() == Role.ADMIN) {</span>
-<span class="nc" id="L60">                return prepareDto(event);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">            if (user.getRole() == Role.ADMIN) {</span>
+<span class="nc" id="L61">                return prepareDto(event);</span>
             }
-<span class="nc" id="L62">            boolean isBelong = Objects.equals(user.getId(), event.getOwner().getId());</span>
-<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (!isBelong) {</span>
-<span class="nc bnc" id="L64" title="All 2 branches missed.">                for (User u : event.getGuests()) {</span>
-<span class="nc bnc" id="L65" title="All 2 branches missed.">                    if (Objects.equals(u.getId(), user.getId())) {</span>
-<span class="nc" id="L66">                        isBelong = true;</span>
-<span class="nc" id="L67">                        break;</span>
+<span class="nc" id="L63">            boolean isBelong = Objects.equals(user.getId(), event.getOwner().getId());</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">            if (!isBelong) {</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">                for (User u : event.getGuests()) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">                    if (Objects.equals(u.getId(), user.getId())) {</span>
+<span class="nc" id="L67">                        isBelong = true;</span>
+<span class="nc" id="L68">                        break;</span>
                     }
-<span class="nc" id="L69">                }</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">                if (!isBelong) {</span>
-<span class="nc" id="L71">                    return new EventDto();</span>
+<span class="nc" id="L70">                }</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                if (!isBelong) {</span>
+<span class="nc" id="L72">                    return new EventDto();</span>
                 }
             }
-<span class="nc" id="L74">            return prepareDto(event);</span>
-<span class="nc" id="L75">        }catch (NotFoundException e){</span>
-<span class="nc" id="L76">            return new EventDto();</span>
+<span class="nc" id="L75">            return prepareDto(event);</span>
+<span class="nc" id="L76">        }catch (NotFoundException e){</span>
+<span class="nc" id="L77">            return new EventDto();</span>
         }
     }
 
 
     private EventDto prepareDto(Event event){
-<span class="nc" id="L82">        List&lt;AccountDto&gt; guests = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L83">        event.getGuests().stream().forEach(e-&gt; guests.add(new AccountDto(e.getId(), e.getUsername(), null, e.getRole().toString())));</span>
-<span class="nc" id="L84">        List&lt;PollOptionDto&gt; pollOptionDtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L83">        List&lt;AccountDto&gt; guests = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L84">        event.getGuests().stream().forEach(e-&gt; guests.add(new AccountDto(e.getId(), e.getUsername(), null, e.getRole().toString())));</span>
+<span class="nc" id="L85">        List&lt;PollOptionDto&gt; pollOptionDtoList = new ArrayList&lt;&gt;();</span>
 
-<span class="nc bnc" id="L86" title="All 2 branches missed.">        for(PollOption e: event.getOptions()){</span>
-<span class="nc" id="L87">            List&lt;VoteDto&gt; voteDtoList = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L88">            e.getVotes().stream().forEach(v -&gt; voteDtoList.add(new VoteDto(v.getId(), v.getComment(), v.getVoteType().toString(), v.getGuest().getId(), e.getId())));</span>
-<span class="nc" id="L89">            PollOptionDto p = new PollOptionDto(e.getId(), e.getDateSlot(), e.getTimeSlot(), e.getIsFinal(), event.getId(), voteDtoList);</span>
-<span class="nc" id="L90">            pollOptionDtoList.add(p);</span>
-<span class="nc" id="L91">        }</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        for(PollOption e: event.getOptions()){</span>
+<span class="nc" id="L88">            List&lt;VoteDto&gt; voteDtoList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L89">            e.getVotes().stream().forEach(v -&gt; voteDtoList.add(new VoteDto(v.getId(), v.getComment(), v.getVoteType().toString(), v.getGuest().getId(), e.getId())));</span>
+<span class="nc" id="L90">            PollOptionDto p = new PollOptionDto(e.getId(), e.getDateSlot(), e.getTimeSlot(), e.getIsFinal(), event.getId(), voteDtoList);</span>
+<span class="nc" id="L91">            pollOptionDtoList.add(p);</span>
+<span class="nc" id="L92">        }</span>
 
-<span class="nc" id="L93">        return new EventDto(event.getId(), event.getName(), event.getDetail(), event.getOpenDueTo(), event.getLocation(), event.getOwner().getId(),</span>
+<span class="nc" id="L94">        return new EventDto(event.getId(), event.getName(), event.getDetail(), event.getOpenDueTo(), event.getLocation(), event.getOwner().getId(),</span>
                 guests, pollOptionDtoList);
     }
 
@@ -98,85 +99,85 @@ public class EventController {
     @PreAuthorize(&quot;hasAnyRole('ROLE_USER')&quot;)
     @GetMapping(value = &quot;/activeOwned&quot;)
     public List&lt;EventDto&gt; getAllActiveOwned(Principal principal) {
-<span class="nc" id="L101">        User user = getUser(principal);</span>
-<span class="nc" id="L102">        List&lt;Integer&gt; activeOwned = eventService.findAllActiveForOwner(user).stream().map(Event::getId).collect(Collectors.toList());;</span>
-<span class="nc" id="L103">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L104">        activeOwned.forEach(e-&gt; events.add(prepareDto(eventService.find(e))));</span>
-<span class="nc" id="L105">        return events;</span>
+<span class="nc" id="L102">        User user = getUser(principal);</span>
+<span class="nc" id="L103">        List&lt;Integer&gt; activeOwned = eventService.findAllActiveForOwner(user).stream().map(Event::getId).collect(Collectors.toList());;</span>
+<span class="nc" id="L104">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L105">        activeOwned.forEach(e-&gt; events.add(prepareDto(eventService.find(e))));</span>
+<span class="nc" id="L106">        return events;</span>
     }
 
 
     @GetMapping(value = &quot;/allOwned&quot;)
     public List&lt;EventDto&gt; getAllOwned(Principal principal) {
-<span class="nc" id="L111">        User user = getUser(principal);</span>
-<span class="nc" id="L112">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L113">        user.getOwnedEvents().forEach(e-&gt; events.add(prepareDto(e)));</span>
-<span class="nc" id="L114">        return events;</span>
+<span class="nc" id="L112">        User user = getUser(principal);</span>
+<span class="nc" id="L113">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L114">        user.getOwnedEvents().forEach(e-&gt; events.add(prepareDto(e)));</span>
+<span class="nc" id="L115">        return events;</span>
     }
 
     @GetMapping(value = &quot;/allGuest&quot;)
     public List&lt;EventDto&gt; getAllGuest(Principal principal) {
-<span class="nc" id="L119">        User user = getUser(principal);</span>
-<span class="nc" id="L120">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L121">        user.getGuestEvents().forEach(e-&gt; events.add(prepareDto(e)));</span>
-<span class="nc" id="L122">        return events;</span>
+<span class="nc" id="L120">        User user = getUser(principal);</span>
+<span class="nc" id="L121">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L122">        user.getGuestEvents().forEach(e-&gt; events.add(prepareDto(e)));</span>
+<span class="nc" id="L123">        return events;</span>
     }
 
     @PreAuthorize(&quot;hasAnyRole('ROLE_USER')&quot;)
     @GetMapping(value = &quot;/activeGuest&quot;)
     public List&lt;EventDto&gt; getAllActiveGuest(Principal principal) {
-<span class="nc" id="L128">        User user = getUser(principal);</span>
-<span class="nc" id="L129">        List&lt;Integer&gt; activeGuest = eventService.findAllActiveGuestEvents(user).stream().map(Event::getId).collect(Collectors.toList());;</span>
-<span class="nc" id="L130">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L131">        activeGuest.forEach(e-&gt; events.add(prepareDto(eventService.find(e))));</span>
-<span class="nc" id="L132">        return events;</span>
+<span class="nc" id="L129">        User user = getUser(principal);</span>
+<span class="nc" id="L130">        List&lt;Integer&gt; activeGuest = eventService.findAllActiveGuestEvents(user).stream().map(Event::getId).collect(Collectors.toList());;</span>
+<span class="nc" id="L131">        List&lt;EventDto&gt; events = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L132">        activeGuest.forEach(e-&gt; events.add(prepareDto(eventService.find(e))));</span>
+<span class="nc" id="L133">        return events;</span>
     }
 
     @PreAuthorize(&quot;hasAnyRole('ROLE_USER')&quot;)
     @GetMapping(value = &quot;/notVoted&quot;)
     public List&lt;Integer&gt; getAllNotVoted(Principal principal) {
-<span class="nc" id="L138">        User user = getUser(principal);</span>
-<span class="nc" id="L139">        List&lt;Integer&gt; notVoted = eventService.findAllNotVotedEvents(user).stream().map(Event::getId).collect(Collectors.toList());;</span>
-<span class="nc" id="L140">        return notVoted;</span>
+<span class="nc" id="L139">        User user = getUser(principal);</span>
+<span class="nc" id="L140">        List&lt;Integer&gt; notVoted = eventService.findAllNotVotedEvents(user).stream().map(Event::getId).collect(Collectors.toList());;</span>
+<span class="nc" id="L141">        return notVoted;</span>
     }
 
 
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @PostMapping(value = &quot;/create&quot;)
     public ResponseEntity&lt;Event&gt; createEvent(Principal principal, @RequestBody EventDto event) {
-<span class="nc" id="L147">            User user = getUser(principal);</span>
-<span class="nc" id="L148">            Event res = eventService.create(event.getName(), event.getDetail(), event.getLocation(), event.getOpenDueTo(), user);</span>
+<span class="nc" id="L148">            User user = getUser(principal);</span>
+<span class="nc" id="L149">            Event res = eventService.create(event.getName(), event.getDetail(), event.getLocation(), event.getOpenDueTo(), user);</span>
 
-<span class="nc" id="L150">            LOG.debug(&quot;Event {} successfully created.&quot;, event.getName());</span>
-<span class="nc" id="L151">            return new ResponseEntity&lt;&gt;(res, HttpStatus.CREATED);</span>
+<span class="nc" id="L151">            LOG.debug(&quot;Event {} successfully created.&quot;, event.getName());</span>
+<span class="nc" id="L152">            return new ResponseEntity&lt;&gt;(res, HttpStatus.CREATED);</span>
     }
 
     @PreAuthorize(&quot;hasAnyRole('ROLE_ADMIN', 'ROLE_USER')&quot;)
     @PutMapping(value = &quot;/{event_id}/update&quot;)
     public ResponseEntity&lt;String&gt; updateEvent(Principal principal, @RequestBody EventDto eventDto ,@PathVariable Integer event_id) {
         try {
-<span class="nc" id="L158">            Account user = getAccount(principal);</span>
-<span class="nc" id="L159">            Event event = eventService.find(event_id);</span>
-<span class="nc" id="L160">            event.setName(eventDto.getName());</span>
-<span class="nc" id="L161">            event.setDetail(eventDto.getDetail());</span>
-<span class="nc" id="L162">            event.setLocation(eventDto.getLocation());</span>
-<span class="nc" id="L163">            event.setOpenDueTo(eventDto.getOpenDueTo());</span>
-<span class="nc bnc" id="L164" title="All 2 branches missed.">            if (user.getRole() == Role.ADMIN) {</span>
-<span class="nc" id="L165">                Event event1 = eventService.update(event, event_id);</span>
-<span class="nc" id="L166">                LOG.debug(&quot;Event {} successfully updated by admin.&quot;, event1.getId());</span>
-<span class="nc" id="L167">                return new ResponseEntity&lt;&gt;(event1.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L159">            Account user = getAccount(principal);</span>
+<span class="nc" id="L160">            Event event = eventService.find(event_id);</span>
+<span class="nc" id="L161">            event.setName(eventDto.getName());</span>
+<span class="nc" id="L162">            event.setDetail(eventDto.getDetail());</span>
+<span class="nc" id="L163">            event.setLocation(eventDto.getLocation());</span>
+<span class="nc" id="L164">            event.setOpenDueTo(eventDto.getOpenDueTo());</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">            if (user.getRole() == Role.ADMIN) {</span>
+<span class="nc" id="L166">                Event event1 = eventService.update(event, event_id);</span>
+<span class="nc" id="L167">                LOG.debug(&quot;Event {} successfully updated by admin.&quot;, event1.getId());</span>
+<span class="nc" id="L168">                return new ResponseEntity&lt;&gt;(event1.toString(), HttpStatus.OK);</span>
             } else {
-<span class="nc bnc" id="L169" title="All 2 branches missed.">                if (!Objects.equals(user.getId(), eventService.find(event_id).getOwner().getId())) {</span>
-<span class="nc" id="L170">                    LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L171">                    return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                if (!Objects.equals(user.getId(), eventService.find(event_id).getOwner().getId())) {</span>
+<span class="nc" id="L171">                    LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L172">                    return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
                 }
-<span class="nc" id="L173">                Event event1 = eventService.update(event, event_id);</span>
-<span class="nc" id="L174">                LOG.debug(&quot;Event {} successfully updated.&quot;, event1.getId());</span>
-<span class="nc" id="L175">                return new ResponseEntity&lt;&gt;(event1.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L174">                Event event1 = eventService.update(event, event_id);</span>
+<span class="nc" id="L175">                LOG.debug(&quot;Event {} successfully updated.&quot;, event1.getId());</span>
+<span class="nc" id="L176">                return new ResponseEntity&lt;&gt;(event1.toString(), HttpStatus.OK);</span>
             }
-<span class="nc" id="L177">        }catch (NotFoundException e){</span>
-<span class="nc" id="L178">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), event_id);</span>
-<span class="nc" id="L179">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L178">        }catch (NotFoundException e){</span>
+<span class="nc" id="L179">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), event_id);</span>
+<span class="nc" id="L180">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
@@ -184,23 +185,23 @@ public class EventController {
     @DeleteMapping(value = &quot;/{id}/delete&quot;)
     public ResponseEntity&lt;String&gt; deleteEvent(Principal principal, @PathVariable Integer id) {
         try {
-<span class="nc" id="L187">            Account user = getAccount(principal);</span>
-<span class="nc" id="L188">            Event event = eventService.find(id);</span>
-<span class="nc bnc" id="L189" title="All 2 branches missed.">            if (user.getRole() == Role.ADMIN) {</span>
-<span class="nc" id="L190">                eventService.delete(event);</span>
-<span class="nc" id="L191">                LOG.debug(&quot;Event {} successfully deleted by admin.&quot;, event.getId());</span>
+<span class="nc" id="L188">            Account user = getAccount(principal);</span>
+<span class="nc" id="L189">            Event event = eventService.find(id);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            if (user.getRole() == Role.ADMIN) {</span>
+<span class="nc" id="L191">                eventService.delete(event);</span>
+<span class="nc" id="L192">                LOG.debug(&quot;Event {} successfully deleted by admin.&quot;, event.getId());</span>
             } else {
-<span class="nc bnc" id="L193" title="All 2 branches missed.">                if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
-<span class="nc" id="L194">                    LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L195">                    return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
+<span class="nc" id="L195">                    LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L196">                    return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
                 }
-<span class="nc" id="L197">                eventService.delete(event);</span>
-<span class="nc" id="L198">                LOG.debug(&quot;Event {} successfully deleted.&quot;, event.getId());</span>
+<span class="nc" id="L198">                eventService.delete(event);</span>
+<span class="nc" id="L199">                LOG.debug(&quot;Event {} successfully deleted.&quot;, event.getId());</span>
             }
-<span class="nc" id="L200">            return new ResponseEntity&lt;&gt;(&quot;Event with id &quot; + id + &quot; successfully deleted&quot;, HttpStatus.OK);</span>
-<span class="nc" id="L201">        }catch (NotFoundException e){</span>
-<span class="nc" id="L202">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L203">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L201">            return new ResponseEntity&lt;&gt;(&quot;Event with id &quot; + id + &quot; successfully deleted&quot;, HttpStatus.OK);</span>
+<span class="nc" id="L202">        }catch (NotFoundException e){</span>
+<span class="nc" id="L203">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L204">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
@@ -208,56 +209,56 @@ public class EventController {
     @PutMapping(value = &quot;/{id}/close&quot;)
     public ResponseEntity&lt;String&gt; closeEvent(Principal principal, @PathVariable Integer id) {
         try {
-<span class="nc" id="L211">            User user = getUser(principal);</span>
-<span class="nc" id="L212">            Event event = eventService.find(id);</span>
-<span class="nc" id="L213">            eventService.closeEvent(event);</span>
-<span class="nc bnc" id="L214" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
-<span class="nc" id="L215">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L216">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L212">            User user = getUser(principal);</span>
+<span class="nc" id="L213">            Event event = eventService.find(id);</span>
+<span class="nc" id="L214">            eventService.closeEvent(event);</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
+<span class="nc" id="L216">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L217">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
             }
 
-<span class="nc" id="L219">            LOG.debug(&quot;Event {} successfully closed.&quot;, event.getId());</span>
-<span class="nc" id="L220">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L221">        }catch (NotFoundException e){</span>
-<span class="nc" id="L222">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L223">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L220">            LOG.debug(&quot;Event {} successfully closed.&quot;, event.getId());</span>
+<span class="nc" id="L221">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L222">        }catch (NotFoundException e){</span>
+<span class="nc" id="L223">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L224">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @PutMapping(value = &quot;/closeAll&quot;)
     public ResponseEntity&lt;String&gt; closeAllEvents(Principal principal) {
-<span class="nc" id="L230">            User user = getUser(principal);</span>
-<span class="nc" id="L231">            eventService.closeAll(user);</span>
-<span class="nc" id="L232">            LOG.debug(&quot;Events for user {} successfully closed.&quot;, user.getId());</span>
-<span class="nc" id="L233">            return new ResponseEntity&lt;&gt;(&quot;Events successfully closed&quot;, HttpStatus.OK);</span>
+<span class="nc" id="L231">            User user = getUser(principal);</span>
+<span class="nc" id="L232">            eventService.closeAll(user);</span>
+<span class="nc" id="L233">            LOG.debug(&quot;Events for user {} successfully closed.&quot;, user.getId());</span>
+<span class="nc" id="L234">            return new ResponseEntity&lt;&gt;(&quot;Events successfully closed&quot;, HttpStatus.OK);</span>
     }
 
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @PutMapping(value = &quot;/{id}/options&quot;)
     public ResponseEntity&lt;String&gt; addPollOption(Principal principal, @PathVariable Integer id, @RequestBody List&lt;PollOptionDto&gt; pollOptionsDto) {
         try {
-<span class="nc" id="L240">            User user = getUser(principal);</span>
-<span class="nc" id="L241">            Event event = eventService.find(id);</span>
-<span class="nc bnc" id="L242" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
-<span class="nc" id="L243">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L244">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L241">            User user = getUser(principal);</span>
+<span class="nc" id="L242">            Event event = eventService.find(id);</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
+<span class="nc" id="L244">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L245">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
             }
-<span class="nc bnc" id="L246" title="All 2 branches missed.">            for (PollOptionDto p : pollOptionsDto) {</span>
-<span class="nc" id="L247">                PollOption pl = new PollOption(p.getDateSlot(), p.getTimeSlot(), event);</span>
-<span class="nc" id="L248">                eventService.addPollOption(event, pl);</span>
-<span class="nc" id="L249">            }</span>
-<span class="nc" id="L250">            LOG.debug(&quot;PollOption(s) successfully added to event{}.&quot;, event.getId());</span>
-<span class="nc" id="L251">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L252">        }catch (DateValidationException d){</span>
-<span class="nc" id="L253">            LOG.debug(&quot;User {} is trying to add not valid pollOption event {} or event is closed.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L254">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
-<span class="nc" id="L255">        }catch (ExistsException e){</span>
-<span class="nc" id="L256">            LOG.debug(&quot;User {} is trying to add same pollOption to event {}.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L257">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
-<span class="nc" id="L258">        }catch (NotFoundException e){</span>
-<span class="nc" id="L259">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L260">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">            for (PollOptionDto p : pollOptionsDto) {</span>
+<span class="nc" id="L248">                PollOption pl = new PollOption(p.getDateSlot(), p.getTimeSlot(), event);</span>
+<span class="nc" id="L249">                eventService.addPollOption(event, pl);</span>
+<span class="nc" id="L250">            }</span>
+<span class="nc" id="L251">            LOG.debug(&quot;PollOption(s) successfully added to event{}.&quot;, event.getId());</span>
+<span class="nc" id="L252">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L253">        }catch (DateValidationException d){</span>
+<span class="nc" id="L254">            LOG.debug(&quot;User {} is trying to add not valid pollOption event {} or event is closed.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L255">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L256">        }catch (ExistsException e){</span>
+<span class="nc" id="L257">            LOG.debug(&quot;User {} is trying to add same pollOption to event {}.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L258">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc" id="L259">        }catch (NotFoundException e){</span>
+<span class="nc" id="L260">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L261">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
@@ -265,26 +266,26 @@ public class EventController {
     @DeleteMapping(value = &quot;/{event_id}/options/{id}&quot;)
     public ResponseEntity&lt;String&gt; removePollOption(Principal principal, @PathVariable Integer event_id, @PathVariable Integer id) {
         try {
-<span class="nc" id="L268">            User user = getUser(principal);</span>
-<span class="nc" id="L269">            Event event = eventService.find(event_id);</span>
-<span class="nc bnc" id="L270" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
-<span class="nc" id="L271">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L272">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L269">            User user = getUser(principal);</span>
+<span class="nc" id="L270">            Event event = eventService.find(event_id);</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
+<span class="nc" id="L272">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L273">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
             }
-<span class="nc" id="L274">            PollOption pollOption = pollOptionService.find(id);</span>
-<span class="nc bnc" id="L275" title="All 2 branches missed.">            if (!Objects.equals(event_id, pollOption.getEvent().getId())) {</span>
-<span class="nc" id="L276">                LOG.debug(&quot;Event {} does not have an pollOption {}.&quot;, event_id, id);</span>
-<span class="nc" id="L277">                return new ResponseEntity&lt;&gt;(&quot;This pollOption does not belong to current event&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L275">            PollOption pollOption = pollOptionService.find(id);</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">            if (!Objects.equals(event_id, pollOption.getEvent().getId())) {</span>
+<span class="nc" id="L277">                LOG.debug(&quot;Event {} does not have an pollOption {}.&quot;, event_id, id);</span>
+<span class="nc" id="L278">                return new ResponseEntity&lt;&gt;(&quot;This pollOption does not belong to current event&quot;, HttpStatus.FORBIDDEN);</span>
             }
-<span class="nc" id="L279">            eventService.removePollOption(event, pollOption);</span>
-<span class="nc" id="L280">            LOG.debug(&quot;PollOption {} successfully deleted from event{}.&quot;, id, event_id);</span>
-<span class="nc" id="L281">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L282">        }catch (DateValidationException d){</span>
-<span class="nc" id="L283">            LOG.debug(&quot;User {} is trying to remove pollOption from closed event {}&quot;, getAccount(principal).getId(), event_id);</span>
-<span class="nc" id="L284">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
-<span class="nc" id="L285">        }catch (NotFoundException e){</span>
-<span class="nc" id="L286">            LOG.debug(&quot;User {} is trying to get unexisting event {} or pollOption {}.&quot;, getAccount(principal).getId(), event_id, id);</span>
-<span class="nc" id="L287">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L280">            eventService.removePollOption(event, pollOption);</span>
+<span class="nc" id="L281">            LOG.debug(&quot;PollOption {} successfully deleted from event{}.&quot;, id, event_id);</span>
+<span class="nc" id="L282">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L283">        }catch (DateValidationException d){</span>
+<span class="nc" id="L284">            LOG.debug(&quot;User {} is trying to remove pollOption from closed event {}&quot;, getAccount(principal).getId(), event_id);</span>
+<span class="nc" id="L285">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L286">        }catch (NotFoundException e){</span>
+<span class="nc" id="L287">            LOG.debug(&quot;User {} is trying to get unexisting event {} or pollOption {}.&quot;, getAccount(principal).getId(), event_id, id);</span>
+<span class="nc" id="L288">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
@@ -292,26 +293,26 @@ public class EventController {
     @PutMapping(value = &quot;/{id}/guests/add/registered&quot;)
     public ResponseEntity&lt;String&gt; addGuestsByUsernames(Principal principal, @PathVariable Integer id, @RequestBody List&lt;String&gt; usernames) {
         try {
-<span class="nc" id="L295">            User user = getUser(principal);</span>
-<span class="nc" id="L296">            Event event = eventService.find(id);</span>
-<span class="nc bnc" id="L297" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
-<span class="nc" id="L298">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L299">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L296">            User user = getUser(principal);</span>
+<span class="nc" id="L297">            Event event = eventService.find(id);</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
+<span class="nc" id="L299">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L300">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
             }
-<span class="nc bnc" id="L301" title="All 2 branches missed.">            for (String u : usernames) {</span>
-<span class="nc" id="L302">                eventService.addRegisteredUserAsAGuestByUsername(u, event);</span>
-<span class="nc" id="L303">            }</span>
-<span class="nc" id="L304">            LOG.debug(&quot;User(s) successfully added to event{}.&quot;, event.getId());</span>
-<span class="nc" id="L305">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L306">        }catch (NotFoundException e){</span>
-<span class="nc" id="L307">            LOG.debug(&quot;User {} is trying to get unexisting event {} or username.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L308">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
-<span class="nc" id="L309">        }catch (DateValidationException d){</span>
-<span class="nc" id="L310">            LOG.debug(&quot;User {} is trying to add guest to closed event {}&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L311">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
-<span class="nc" id="L312">        }catch (ExistsException e){</span>
-<span class="nc" id="L313">            LOG.debug(&quot;User {} is trying to add same guest to event {}.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L314">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">            for (String u : usernames) {</span>
+<span class="nc" id="L303">                eventService.addRegisteredUserAsAGuestByUsername(u, event);</span>
+<span class="nc" id="L304">            }</span>
+<span class="nc" id="L305">            LOG.debug(&quot;User(s) successfully added to event{}.&quot;, event.getId());</span>
+<span class="nc" id="L306">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L307">        }catch (NotFoundException e){</span>
+<span class="nc" id="L308">            LOG.debug(&quot;User {} is trying to get unexisting event {} or username.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L309">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L310">        }catch (DateValidationException d){</span>
+<span class="nc" id="L311">            LOG.debug(&quot;User {} is trying to add guest to closed event {}&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L312">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L313">        }catch (ExistsException e){</span>
+<span class="nc" id="L314">            LOG.debug(&quot;User {} is trying to add same guest to event {}.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L315">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.BAD_REQUEST);</span>
         }
     }
 
@@ -319,23 +320,23 @@ public class EventController {
     @PutMapping(value = &quot;/{id}/guests/add/notregistered&quot;)
     public ResponseEntity&lt;String&gt; addGuestsByEmails(Principal principal, @PathVariable Integer id, @RequestBody List&lt;String&gt; emails) {
         try {
-<span class="nc" id="L322">            User user = getUser(principal);</span>
-<span class="nc" id="L323">            Event event = eventService.find(id);</span>
-<span class="nc bnc" id="L324" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
-<span class="nc" id="L325">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L326">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L323">            User user = getUser(principal);</span>
+<span class="nc" id="L324">            Event event = eventService.find(id);</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
+<span class="nc" id="L326">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L327">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
             }
-<span class="nc bnc" id="L328" title="All 2 branches missed.">            for (String u : emails) {</span>
-<span class="nc" id="L329">                eventService.addUserAsAGuestByEmail(u, event);</span>
-<span class="nc" id="L330">            }</span>
-<span class="nc" id="L331">            LOG.debug(&quot;User(s) successfully added to event{} or email for registration sended.&quot;, event.getId());</span>
-<span class="nc" id="L332">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L333">        }catch (NotFoundException e){</span>
-<span class="nc" id="L334">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L335">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
-<span class="nc" id="L336">        }catch (DateValidationException d){</span>
-<span class="nc" id="L337">            LOG.debug(&quot;User {} is trying to add guest to closed event {}&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L338">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">            for (String u : emails) {</span>
+<span class="nc" id="L330">                eventService.addUserAsAGuestByEmail(u, event);</span>
+<span class="nc" id="L331">            }</span>
+<span class="nc" id="L332">            LOG.debug(&quot;User(s) successfully added to event{} or email for registration sended.&quot;, event.getId());</span>
+<span class="nc" id="L333">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L334">        }catch (NotFoundException e){</span>
+<span class="nc" id="L335">            LOG.debug(&quot;User {} is trying to get unexisting event {}.&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L336">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L337">        }catch (DateValidationException d){</span>
+<span class="nc" id="L338">            LOG.debug(&quot;User {} is trying to add guest to closed event {}&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L339">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
@@ -344,22 +345,32 @@ public class EventController {
     @DeleteMapping(value = &quot;/{event_id}/guests/delete/{id}&quot;)
     public ResponseEntity&lt;String&gt; removeGuest(Principal principal, @PathVariable Integer event_id, @PathVariable Integer id) {
         try {
-<span class="nc" id="L347">            User user = getUser(principal);</span>
-<span class="nc" id="L348">            Event event = eventService.find(event_id);</span>
-<span class="nc bnc" id="L349" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
-<span class="nc" id="L350">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L351">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L348">            User user = getUser(principal);</span>
+<span class="nc" id="L349">            Event event = eventService.find(event_id);</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">            if (!Objects.equals(user.getId(), event.getOwner().getId())) {</span>
+<span class="nc" id="L351">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L352">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
             }
-<span class="nc" id="L353">            User guest = userService.find(id);</span>
-<span class="nc" id="L354">            eventService.removeGuest(event, guest);</span>
-<span class="nc" id="L355">            LOG.debug(&quot;User {} successfully removed from event {}.&quot;, user.getId(), event.getId());</span>
-<span class="nc" id="L356">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L357">        }catch (NotFoundException e){</span>
-<span class="nc" id="L358">            LOG.debug(&quot;User {} is trying to remove guest with id {} from event {}&quot;, getAccount(principal).getId(), event_id, id);</span>
-<span class="nc" id="L359">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
-<span class="nc" id="L360">        }catch (DateValidationException d){</span>
-<span class="nc" id="L361">            LOG.debug(&quot;User {} is trying to add guest to closed event {}&quot;, getAccount(principal).getId(), id);</span>
-<span class="nc" id="L362">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L354">            User guest = userService.find(id);</span>
+
+<span class="nc bnc" id="L356" title="All 2 branches missed.">            for(PollOption p: event.getOptions()){</span>
+<span class="nc" id="L357">                List&lt;Vote&gt; votesToRemove = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">                for(Vote v: p.getVotes()){</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">                    if(Objects.equals(v.getGuest().getId(), id)){</span>
+<span class="nc" id="L360">                        votesToRemove.add(v);</span>
+                    }
+<span class="nc" id="L362">                }</span>
+<span class="nc" id="L363">                p.getVotes().removeAll(votesToRemove);</span>
+<span class="nc" id="L364">            }</span>
+<span class="nc" id="L365">            eventService.removeGuest(event, guest);</span>
+<span class="nc" id="L366">            LOG.debug(&quot;User {} successfully removed from event {}.&quot;, user.getId(), event.getId());</span>
+<span class="nc" id="L367">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L368">        }catch (NotFoundException e){</span>
+<span class="nc" id="L369">            LOG.debug(&quot;User {} is trying to remove guest with id {} from event {}&quot;, getAccount(principal).getId(), event_id, id);</span>
+<span class="nc" id="L370">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L371">        }catch (DateValidationException d){</span>
+<span class="nc" id="L372">            LOG.debug(&quot;User {} is trying to add guest to closed event {}&quot;, getAccount(principal).getId(), id);</span>
+<span class="nc" id="L373">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
@@ -367,38 +378,47 @@ public class EventController {
     @DeleteMapping(value = &quot;/{event_id}/guests/leave&quot;)
     public ResponseEntity&lt;String&gt; leaveEvent(Principal principal, @PathVariable Integer event_id) {
         try {
-<span class="nc" id="L370">            User user = getUser(principal);</span>
-<span class="nc" id="L371">            Event event = eventService.find(event_id);</span>
-<span class="nc bnc" id="L372" title="All 2 branches missed.">            if (event.getGuests().stream().noneMatch(g -&gt; Objects.equals(g.getId(), user.getId()))) {</span>
-<span class="nc" id="L373">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
-<span class="nc" id="L374">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
+<span class="nc" id="L381">            User user = getUser(principal);</span>
+<span class="nc" id="L382">            Event event = eventService.find(event_id);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">            if (event.getGuests().stream().noneMatch(g -&gt; Objects.equals(g.getId(), user.getId()))) {</span>
+<span class="nc" id="L384">                LOG.debug(&quot;Event {} does not belong to user {}.&quot;, event.getId(), user.getId());</span>
+<span class="nc" id="L385">                return new ResponseEntity&lt;&gt;(&quot;This event does not belong to current user&quot;, HttpStatus.FORBIDDEN);</span>
             }
-<span class="nc" id="L376">            eventService.removeGuest(event, user);</span>
-<span class="nc" id="L377">            LOG.debug(&quot;User {} successfully removed from event {}.&quot;, user.getId(), event.getId());</span>
-<span class="nc" id="L378">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
-<span class="nc" id="L379">        }catch (NotFoundException e){</span>
-<span class="nc" id="L380">            LOG.debug(&quot;User is trying to remove guest with id {} from event {}&quot;, getAccount(principal).getId(), event_id);</span>
-<span class="nc" id="L381">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
-<span class="nc" id="L382">        }catch (DateValidationException d){</span>
-<span class="nc" id="L383">            LOG.debug(&quot;User is trying to add guest to closed event {}&quot;, getAccount(principal).getId());</span>
-<span class="nc" id="L384">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">            for(PollOption p: event.getOptions()){</span>
+<span class="nc" id="L388">                List&lt;Vote&gt; votesToRemove = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                for(Vote v: p.getVotes()){</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">                    if(Objects.equals(v.getGuest().getId(), user.getId())){</span>
+<span class="nc" id="L391">                        votesToRemove.add(v);</span>
+                    }
+<span class="nc" id="L393">                }</span>
+<span class="nc" id="L394">                p.getVotes().removeAll(votesToRemove);</span>
+<span class="nc" id="L395">            }</span>
+<span class="nc" id="L396">            eventService.removeGuest(event, user);</span>
+<span class="nc" id="L397">            LOG.debug(&quot;User {} successfully removed from event {}.&quot;, user.getId(), event.getId());</span>
+<span class="nc" id="L398">            return new ResponseEntity&lt;&gt;(event.toString(), HttpStatus.OK);</span>
+<span class="nc" id="L399">        }catch (NotFoundException e){</span>
+<span class="nc" id="L400">            LOG.debug(&quot;User is trying to remove guest with id {} from event {}&quot;, getAccount(principal).getId(), event_id);</span>
+<span class="nc" id="L401">            return new ResponseEntity&lt;&gt;(e.getMessage(), HttpStatus.NOT_FOUND);</span>
+<span class="nc" id="L402">        }catch (DateValidationException d){</span>
+<span class="nc" id="L403">            LOG.debug(&quot;User is trying to add guest to closed event {}&quot;, getAccount(principal).getId());</span>
+<span class="nc" id="L404">            return new ResponseEntity&lt;&gt;(d.getMessage(), HttpStatus.NOT_FOUND);</span>
         }
     }
 
     private User getUser(Principal principal){
-<span class="nc" id="L389">        final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L390">        Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L391">        return userService.find(id);</span>
+<span class="nc" id="L409">        final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L410">        Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L411">        return userService.find(id);</span>
     }
 
     private Account getAccount(Principal principal){
-<span class="nc" id="L395">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
-<span class="nc" id="L396">            Integer id = auth.getPrincipal().getAccount().getId();</span>
-<span class="nc" id="L397">            Account acc = userService.findById(id);</span>
-<span class="nc bnc" id="L398" title="All 2 branches missed.">            if(acc==null){</span>
-<span class="nc" id="L399">                acc = adminService.findById(id);</span>
+<span class="nc" id="L415">            final AuthenticationToken auth = (AuthenticationToken) principal;</span>
+<span class="nc" id="L416">            Integer id = auth.getPrincipal().getAccount().getId();</span>
+<span class="nc" id="L417">            Account acc = userService.findById(id);</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">            if(acc==null){</span>
+<span class="nc" id="L419">                acc = adminService.findById(id);</span>
             }
-<span class="nc" id="L401">            return acc;</span>
+<span class="nc" id="L421">            return acc;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
